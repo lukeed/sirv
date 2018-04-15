@@ -10,13 +10,15 @@ function find(uri, extns) {
 		return { file:uri, data:FILES.get(uri) };
 	}
 
-	let x, arr=[], file, data, len=uri.length-1;
+	let i, j, x, arr=[], file, data, len=uri.length-1;
 	if (uri.charCodeAt(len) === 47) uri=uri.substring(0, len);
 
-	let i=0, idx=`${uri}/index`;
-	for (; i < extns.length; i++) {
+	let tmp = uri ? [uri, `${uri}/index`] : ['index'];
+	for (i=0; i < extns.length; i++) {
 		x = '.' + extns[i];
-		arr.push(uri + x, idx + x);
+		for (j=0; j < tmp.length; j++) {
+			arr.push(tmp[j] + x);
+		}
 	}
 
 	for (i=0; i < arr.length; i++) {
