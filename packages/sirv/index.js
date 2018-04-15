@@ -33,7 +33,7 @@ module.exports = function (dir, opts={}) {
 		throw new Error('HTTP/2 requires "key" and "cert" values!');
 	}
 	let extensions = opts.extensions || ['html', 'htm'];
-	let onNoMatch = opts.onNoMatch || res => (res.statusCode=404,res.end());
+	let onNoMatch = opts.onNoMatch || (res => (res.statusCode=404,res.end()));
 	return http2.createSecureServer(opts, (req, res) => {
 		let name = req.path || req.pathname || parse(req).pathname;
 		let { file, data } = find(name, extensions);
