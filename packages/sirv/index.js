@@ -6,7 +6,7 @@ const FILES = new Map();
 function find(uri, extns) {
 	uri = uri.substring(1);
 
-	if (!!~file.lastIndexOf('.')) {
+	if (!!~uri.lastIndexOf('.')) {
 		return { file:uri, data:FILES.get(uri) };
 	}
 
