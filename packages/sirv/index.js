@@ -1,13 +1,13 @@
 const http2 = require('http2');
 const parse = require('parseurl');
 
-const FILES = new Map();
+const FILES = {};
 
 function find(uri, extns) {
 	uri = uri.substring(1);
 
 	if (!!~uri.lastIndexOf('.')) {
-		return { file:uri, data:FILES.get(uri) };
+		return { file:uri, data:FILES[uri] };
 	}
 
 	let i, j, x, arr=[], file, data, len=uri.length-1;
@@ -22,7 +22,7 @@ function find(uri, extns) {
 	}
 
 	for (i=0; i < arr.length; i++) {
-		if (data=FILES.get(file=arr[i])) break;
+		if (data=FILES[file=arr[i]]) break;
 	}
 
 	return { file, data };
