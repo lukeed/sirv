@@ -67,7 +67,7 @@ module.exports = function (dir, opts={}) {
 	let extensions = opts.extensions || ['html', 'htm'];
 	let onNoMatch = opts.onNoMatch || (res => (res.statusCode=404,res.end()));
 
-	return createServer(opts, (req, res) => {
+	return createServer((req, res) => {
 		let pathname = req.path || req.pathname || parseurl(req).pathname;
 		let data = find(pathname, extensions);
 		if (!data) return onNoMatch(res);
@@ -75,6 +75,6 @@ module.exports = function (dir, opts={}) {
 		res.writeHead(200, data.headers);
 		setHeaders(res, pathname, data.stats);
 
-		fs.createReadStream({ fd:data.fd }).pipe(res);
+		fs.createReadStream(null, { fd:data.fd }).pipe(res);
 	});
 }
