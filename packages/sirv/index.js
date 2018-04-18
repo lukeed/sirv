@@ -44,14 +44,15 @@ function toEtag(obj) {
 }
 
 module.exports = function (dir, opts={}) {
+	console.log(dir);
 	let cc = opts.maxAge && `public,max-age=${opts.maxAge}`;
 	cc && opts.immutable && (cc += ',immutable');
 
 	opts.cwd = dir;
-	let fd, stats, headers;
+	let abs, stats, headers;
 	tglob('**/*.*', opts).forEach(str => {
-		fd = fs.openSync(join(dir, str), 'r');
-		stats = fs.fstatSync(fd);
+		abs = join(dir, str);
+		stats = fs.statSync(abs);
 		headers = {
 			'content-length': stats.size,
 			'content-type': mime.getType(str),
@@ -59,7 +60,7 @@ module.exports = function (dir, opts={}) {
 		};
 		cc && (headers['cache-control'] = cc);
 		opts.etag && (headers['etag'] = toEtag(stats));
-		FILES['/' + str] = { fd, stats, headers };
+		FILES['/' + str] = { abs, stats, headers };
 	});
 
 	let setHeaders = opts.setHeaders || noop;
@@ -74,6 +75,6 @@ module.exports = function (dir, opts={}) {
 		res.writeHead(200, data.headers);
 		setHeaders(res, pathname, data.stats);
 
-		fs.createReadStream(null, { fd:data.fd }).pipe(res);
+		fs.createReadStream(data.abs).pipe(res);
 	});
 }
