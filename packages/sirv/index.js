@@ -44,7 +44,6 @@ function toEtag(obj) {
 }
 
 module.exports = function (dir, opts={}) {
-	console.log(dir);
 	let cc = opts.maxAge && `public,max-age=${opts.maxAge}`;
 	cc && opts.immutable && (cc += ',immutable');
 
