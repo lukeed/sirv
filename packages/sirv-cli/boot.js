@@ -1,4 +1,5 @@
 const sirv = require('sirv');
+const colors = require('clorox');
 const { resolve } = require('path');
 const clear = require('console-clear');
 const { find } = require('port-authority');
@@ -34,10 +35,10 @@ module.exports = function (dir, opts) {
 			clear(); // wipe screen
 			let PAD = '  ';
 			let { local, network } = access({ port, https });
-			stdout.write('\n' + PAD + 'Your application is ready~! 🚀\n\n');
-			isOther && stdout.write(PAD + `Port ${opts.port} is taken; using ${port} instead\n\n`);
-			stdout.write(PAD + `Local:      ${local}\n`);
-			stdout.write(PAD + `Network:    ${network}\n`);
+			stdout.write('\n' + PAD + colors.green('Your application is ready~! 🚀\n\n'));
+			isOther && stdout.write(PAD + colors.italic.dim(`➡ Port ${opts.port} is taken; using ${port} instead\n\n`));
+			stdout.write(PAD + `${colors.bold('- Local:')}      ${local}\n`);
+			stdout.write(PAD + `${colors.bold('- Network:')}    ${network}\n`);
 		});
 	});
 }

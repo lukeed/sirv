@@ -17,6 +17,7 @@
     "node": ">= 6"
   },
   "dependencies": {
+    "clorox": "^1.0.3",
     "console-clear": "^1.1.0",
     "local-access": "^1.0.1",
     "port-authority": "^1.0.3",
