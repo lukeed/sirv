@@ -17,6 +17,7 @@
     "node": ">= 6"
   },
   "dependencies": {
+    "port-authority": "^1.0.3",
     "sade": "^1.4.0",
     "sirv": "*"
   }

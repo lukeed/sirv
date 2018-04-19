@@ -1,5 +1,6 @@
 const sirv = require('sirv');
 const { resolve } = require('path');
+const { find } = require('port-authority');
 
 function toMS(arr) {
 	return `${(arr[1] / 1e6).toFixed(2)}ms`;
@@ -21,8 +22,11 @@ module.exports = function (dir, opts) {
 		});
 	}
 
-	// TODO: port-authority
-	server.listen(opts.port, err => {
-		if (err) throw err;
+	find(opts.port).then(port => {
+		let isOther = port !== opts.port;
+		server.listen(port, err => {
+			if (err) throw err;
+			console.log('running', port, opts.port);
+		});
 	});
 }
