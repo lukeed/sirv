@@ -13,7 +13,7 @@
     "url": "https://lukeed.com"
   },
   "engines": {
-    "node": ">= 8.4"
+    "node": ">= 6"
   },
   "dependencies": {
     "mime": "^2.3.1",

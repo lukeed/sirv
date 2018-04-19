@@ -14,7 +14,7 @@
     "url": "https://lukeed.com"
   },
   "engines": {
-    "node": ">= 8.4"
+    "node": ">= 6"
   },
   "dependencies": {
     "sade": "^1.4.0",
