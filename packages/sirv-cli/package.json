@@ -22,6 +22,7 @@
     "local-access": "^1.0.1",
     "port-authority": "^1.0.3",
     "sade": "^1.4.0",
-    "sirv": "*"
+    "sirv": "*",
+    "tinydate": "^1.0.0"
   }
 }

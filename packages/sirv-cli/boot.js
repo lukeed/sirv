@@ -4,8 +4,14 @@ const { resolve } = require('path');
 const clear = require('console-clear');
 const { find } = require('port-authority');
 const access = require('local-access');
+const tinydate = require('tinydate');
 
 const PAD = '  ';
+const stamp = tinydate('{HH}:{mm}:{ss}');
+
+function toTime() {
+	return '[' + colors.magenta(stamp()) + '] ';
+}
 
 function toMS(arr) {
 	return colors.white.bold(`${(arr[1] / 1e6).toFixed(2)}ms`);
@@ -29,7 +35,7 @@ module.exports = function (dir, opts) {
 			req.once('end', _ => {
 				dur = hrtime(start);
 				uri = req.originalUrl || req.url;
-				stdout.write(PAD + toCode(res.statusCode) + dash + toMS(dur) + dash + uri + '\n');
+				stdout.write(PAD + toTime() + toCode(res.statusCode) + dash + toMS(dur) + dash + uri + '\n');
 			});
 		});
 	}
