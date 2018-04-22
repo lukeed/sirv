@@ -2,9 +2,9 @@ const sirv = require('sirv');
 const colors = require('clorox');
 const { resolve } = require('path');
 const clear = require('console-clear');
-const { find } = require('port-authority');
 const access = require('local-access');
 const tinydate = require('tinydate');
+const toPort = require('get-port');
 
 const PAD = '  ';
 const stamp = tinydate('{HH}:{mm}:{ss}');
@@ -40,7 +40,7 @@ module.exports = function (dir, opts) {
 		});
 	}
 
-	find(opts.port).then(port => {
+	toPort(opts.port).then(port => {
 		let https = !!opts.ssl; // TODO
 		let isOther = port !== opts.port;
 		server.listen(port, err => {

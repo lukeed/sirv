@@ -19,8 +19,8 @@
   "dependencies": {
     "clorox": "^1.0.3",
     "console-clear": "^1.1.0",
+    "get-port": "^3.2.0",
     "local-access": "^1.0.1",
-    "port-authority": "^1.0.3",
     "sade": "^1.4.0",
     "sirv": "*",
     "tinydate": "^1.0.0"
