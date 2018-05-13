@@ -7,7 +7,7 @@ const boot = require('./boot');
 sade('sirv')
 	.version(pkg.version)
 	.example('start') // TODO: more
-	.command('start [dir]', 'Start an HTTP/2 file server.', { default:true })
+	.command('start [dir]', 'Start a static file server.', { default:true })
 	// .option('--key', 'Path to SSL certificate key (Required)')
 	// .option('--cert', 'Path to SSL certificate file (Required)')
 	// .option('--cacert', 'Path to SSL certificate authority (Optional)')
