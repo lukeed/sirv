@@ -48,6 +48,7 @@ module.exports = function (dir, opts={}) {
 
 	opts.cwd = dir;
 	let abs, stats, headers;
+	opts.dot = !!opts.dotfiles;
 	tglob('**/*.*', opts).forEach(str => {
 		abs = join(dir, str);
 		stats = fs.statSync(abs);
