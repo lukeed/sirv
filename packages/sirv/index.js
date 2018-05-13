@@ -7,17 +7,6 @@ const mime = require('mime/lite');
 const FILES = {};
 const noop = () => {};
 
-// opts = {
-// 	// etag,
-// 	// dot, // serve dot files (glob)
-// 	// cache, // string to append?
-// 	// maxAge + immutable + lastModified
-// 	manifest, // push manifest
-// 	compress, // gzip (default), brotli, zopfli ~> compress on init
-// 	// setHeaders // function
-// 	// onNoMatch
-// }
-
 function find(uri, extns) {
 	if (!!~uri.lastIndexOf('.')) return FILES[uri];
 
