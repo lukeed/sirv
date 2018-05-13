@@ -15,10 +15,11 @@ sade('sirv')
 	.option('-d, --dot', 'Enable dotfile assets')
 	.option('-e, --etag', 'Enable "Etag" headers')
 	.option('-c, --cors', 'Enable "CORS" headers to allow any origin requestor')
+	.option('-m, --maxage', 'Enable "Cache-Control" header & define its "max-age" value (sec)')
+	.option('-i, --immutable', 'Enable the "immutable" directive for "Cache-Control" header')
 	// .option('-c, --compress', 'Enable file compression with specified format', 'gzip')
 	.option('-q, --quiet', 'Disable logging to terminal')
 	.option('-p, --port', 'Port to listen', 5000)
 		// s, single
-		// C? cache
 	.action(boot)
 	.parse(process.argv);

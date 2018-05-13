@@ -33,6 +33,7 @@ module.exports = function (dir, opts) {
 		}
 	}
 
+	opts.maxAge = opts.m;
 	let fn = sirv(dir, opts);
 	let server = createServer(fn);
 	let { hrtime, stdout } = process;
