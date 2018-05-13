@@ -1,6 +1,5 @@
 const fs = require('fs');
 const { join } = require('path');
-const { createServer } = require('http');
 const tglob = require('tiny-glob/sync');
 const parseurl = require('parseurl');
 const mime = require('mime/lite');
@@ -66,7 +65,7 @@ module.exports = function (dir, opts={}) {
 	let extensions = opts.extensions || ['html', 'htm'];
 	let onNoMatch = opts.onNoMatch || (res => (res.statusCode=404,res.end()));
 
-	return createServer((req, res) => {
+	return function (req, res) {
 		let pathname = req.path || req.pathname || parseurl(req).pathname;
 		let data = find(pathname, extensions);
 		if (!data) return onNoMatch(res);
@@ -75,5 +74,5 @@ module.exports = function (dir, opts={}) {
 		setHeaders(res, pathname, data.stats);
 
 		fs.createReadStream(data.abs).pipe(res);
-	});
+	}
 }
