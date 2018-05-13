@@ -2,6 +2,7 @@ const sirv = require('sirv');
 const colors = require('clorox');
 const { resolve } = require('path');
 const clear = require('console-clear');
+const { createServer } = require('http');
 const access = require('local-access');
 const tinydate = require('tinydate');
 const toPort = require('get-port');
@@ -25,7 +26,8 @@ function toCode(code) {
 module.exports = function (dir, opts) {
 	dir = resolve(dir || '.');
 
-	let server = sirv(dir, opts);
+	let fn = sirv(dir, opts);
+	let server = createServer(fn);
 	let { hrtime, stdout } = process;
 
 	if (!opts.quiet) {
