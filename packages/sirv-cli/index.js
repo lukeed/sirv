@@ -14,11 +14,11 @@ sade('sirv')
 	// .option('-m, --manifest', 'Path to HTTP/2 push manifest file')
 	.option('-d, --dot', 'Enable dotfile assets')
 	.option('-e, --etag', 'Enable "Etag" headers')
+	.option('-c, --cors', 'Enable "CORS" headers to allow any origin requestor')
 	// .option('-c, --compress', 'Enable file compression with specified format', 'gzip')
 	.option('-q, --quiet', 'Disable logging to terminal')
 	.option('-p, --port', 'Port to listen', 5000)
 		// s, single
 		// C? cache
-		// C? cors
 	.action(boot)
 	.parse(process.argv);

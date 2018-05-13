@@ -26,6 +26,13 @@ function toCode(code) {
 module.exports = function (dir, opts) {
 	dir = resolve(dir || '.');
 
+	if (opts.cors) {
+		opts.setHeaders = res => {
+			res.setHeader('Access-Control-Allow-Origin', '*');
+			res.setHeader('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept, Range');
+		}
+	}
+
 	let fn = sirv(dir, opts);
 	let server = createServer(fn);
 	let { hrtime, stdout } = process;
