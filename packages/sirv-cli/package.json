@@ -4,9 +4,9 @@
   "description": "WIP",
   "repository": "lukeed/sirv",
   "license": "MIT",
-  "bin": "bin.js",
+  "bin": "index.js",
   "files": [
-    "bin.js"
+    "index.js"
   ],
   "author": {
     "name": "Luke Edwards",
