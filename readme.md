@@ -4,7 +4,7 @@
 
 * **sirv**<br>
   [GitHub](https://github.com/lukeed/sirv/tree/master/packages/sirv) · [Package](https://www.npmjs.com/package/sirv) <br>
-  _The core module, returning a middleware function for use in [Polka](https://github.com/lukeed/polka/pulls) & Express-like frameworks._
+  _The core module, returning a middleware function for use in [Polka](https://github.com/lukeed/polka) & Express-like frameworks._
 
 * **sirv-cli**<br>
   [GitHub](https://github.com/lukeed/sirv/tree/master/packages/sirv-cli) · [Package](https://www.npmjs.com/package/sirv-cli) <br>
