@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-const fs = require('fs');
 const sade = require('sade');
 const pkg = require('./package');
 const boot = require('./boot');
