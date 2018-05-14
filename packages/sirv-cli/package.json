@@ -6,7 +6,7 @@
   "license": "MIT",
   "bin": "index.js",
   "files": [
-    "index.js"
+    "*.js"
   ],
   "author": {
     "name": "Luke Edwards",
