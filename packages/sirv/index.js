@@ -31,6 +31,10 @@ function toEtag(obj) {
 	return `W/"${obj.size.toString(16)}-${obj.mtime.getTime().toString(16)}"`;
 }
 
+function is404(res) {
+	return (res.statusCode=404,res.end());
+}
+
 module.exports = function (dir, opts={}) {
 	let cc = opts.maxAge && `public,max-age=${opts.maxAge}`;
 	cc && opts.immutable && (cc += ',immutable');
@@ -51,14 +55,14 @@ module.exports = function (dir, opts={}) {
 		FILES['/' + str] = { abs, stats, headers };
 	});
 
+	let notFound = opts.onNoMatch || is404;
 	let setHeaders = opts.setHeaders || noop;
 	let extensions = opts.extensions || ['html', 'htm'];
-	let onNoMatch = opts.onNoMatch || (res => (res.statusCode=404,res.end()));
 
-	return function (req, res) {
+	return function (req, res, next) {
 		let pathname = req.path || req.pathname || parseurl(req).pathname;
 		let data = find(pathname, extensions);
-		if (!data) return onNoMatch(res);
+		if (!data) return (next || notFound)(res);
 
 		res.writeHead(200, data.headers);
 		setHeaders(res, pathname, data.stats);
