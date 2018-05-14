@@ -20,10 +20,9 @@
 
 <br />
 
-- This is the CLI counterpart to the `sirv` library and the `@polka/static` middleware.
-- Unlike `sirv`, will compress files on init
-- Quickly start a server on your static assets, or preview _any_ directory if installed globally.
-- Link to [`serve`](https://github.com/zeit/serve) for comparison
+Quickly start a server to preview the assets of _any_ directory!
+
+Just like [`serve`](https://github.com/zeit/serve), you may install and use `sirv-cli` globally or on a per-project basis.
 
 
 ## Install
@@ -36,7 +35,9 @@ $ npm install --save sirv-cli
 
 ## Usage
 
-Running `sirv` as a standalone command is an alias of `sirv start`, with the sole exception of displaying help text (via `-h` or `--help`).
+Running `sirv` as a standalone command is an alias of `sirv start`, with the sole exception of displaying help text!
+
+> **Note:** This is because `sirv-cli` may include new commands in the future. <br>For example, compression may be extracted to a `compress` command, or `watch` may be added.
 
 ```
 $ sirv --help

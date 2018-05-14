@@ -1,6 +1,6 @@
 # sirv [![Build Status](https://travis-ci.org/lukeed/sirv.svg?branch=master)](https://travis-ci.org/lukeed/sirv)
 
-> A family of optimized and lightweight modules to serve static files
+> An optimized middleware & CLI application for serving static files~!
 
 * **sirv**<br>
   [GitHub](https://github.com/lukeed/sirv/tree/master/packages/sirv) · [Package](https://www.npmjs.com/package/sirv) <br>

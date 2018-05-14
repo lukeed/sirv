@@ -1,7 +1,7 @@
 {
   "name": "sirv-cli",
   "version": "0.0.0",
-  "description": "WIP",
+  "description": "A lightweight CLI program to serve static sites~!",
   "repository": "lukeed/sirv",
   "license": "MIT",
   "bin": "index.js",
