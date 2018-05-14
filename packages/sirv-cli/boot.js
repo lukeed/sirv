@@ -24,7 +24,9 @@ function toCode(code) {
 }
 
 module.exports = function (dir, opts) {
+	let fn;
 	dir = resolve(dir || '.');
+	opts.maxAge = opts.m;
 
 	if (opts.cors) {
 		opts.setHeaders = res => {
@@ -33,8 +35,11 @@ module.exports = function (dir, opts) {
 		}
 	}
 
-	opts.maxAge = opts.m;
-	let fn = sirv(dir, opts);
+	if (opts.single) {
+		opts.onNoMatch = res => fn({ path:'/' }, res, r => (r.statusCode=404,r.end()));
+	}
+
+	fn = sirv(dir, opts);
 	let server = createServer(fn);
 	let { hrtime, stdout } = process;
 
