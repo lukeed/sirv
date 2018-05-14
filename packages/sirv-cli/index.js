@@ -6,7 +6,11 @@ const boot = require('./boot');
 
 sade('sirv')
 	.version(pkg.version)
-	.example('start') // TODO: more
+	.example('build --cors --port 8080')
+	.example('start build --cors --port 8080')
+	.example('public --quiet --etag --maxage 31536000 --immutable')
+	.example('start public -qeim 31536000')
+	.example('--port 8080 --etag')
 	.command('start [dir]', 'Start a static file server.', { default:true })
 	.option('-e, --etag', 'Enable "Etag" header')
 	.option('-d, --dotfiles', 'Enable dotfile asset requests')
