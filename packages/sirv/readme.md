@@ -48,7 +48,7 @@ Returns: `Function`
 
 The returned function is a middleware in the standard Express-like signature: `(req, res, next)`, where `req` is the [`http.IncomingMessage`](https://nodejs.org/api/http.html#http_class_http_incomingmessage), `res` is the [`http.ServerResponse`](https://nodejs.org/dist/latest-v9.x/docs/api/http.html#http_class_http_serverresponse), and `next` (in this case) is the function to call if no file was found for the given path.
 
-For `sirv`, the `next()` callback is functionally synonymous with [`opts.onNoMatch`](#optsonnomatch); however `next()` is given priority if/when defined.
+For `sirv`, the `next()` callback is functionally synonymous with [`opts.onNoMatch`](#optsonnomatch); however `next()` is given priority if/when defined and **will not** receive the `res` as an argument.
 
 #### dir
 Type: `String`<br>
@@ -93,11 +93,11 @@ Appends the [`immutable` directive](https://developer.mozilla.org/en-US/docs/Web
 #### opts.onNoMatch
 Type: `Function`
 
-A custom function to run if a file cannot be found for a given request. By default, `sirv` will send a basic `(404) Not found` response.
+A custom function to run if a file cannot be found for a given request. <br>By default, `sirv` will send a basic `(404) Not found` response.
 
 The function receives the current `res <ServerResponse>` as its only argument.
 
-> **Note:** This can only be replaced if a `next` callback has been provided to the middleware; see [`sirv`](#sirvdir-opts) description.
+> **Note:** This won't run if a `next` callback has been provided to the middleware; see [`sirv`](#sirvdir-opts) description.
 
 #### opts.setHeaders
 Type: `Function`
