@@ -62,7 +62,7 @@ module.exports = function (dir, opts={}) {
 	return function (req, res, next) {
 		let pathname = req.path || req.pathname || parseurl(req).pathname;
 		let data = find(pathname, extensions);
-		if (!data) return (next || notFound)(res);
+		if (!data) return next ? next() : notFound(res);
 
 		res.writeHead(200, data.headers);
 		setHeaders(res, pathname, data.stats);
