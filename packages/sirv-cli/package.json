@@ -1,6 +1,6 @@
 {
   "name": "sirv-cli",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A lightweight CLI program to serve static sites~!",
   "repository": "lukeed/sirv",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "get-port": "^3.2.0",
     "local-access": "^1.0.1",
     "sade": "^1.4.0",
-    "sirv": "^0.1.1",
+    "sirv": "^0.1.2",
     "tinydate": "^1.0.0"
   }
 }
