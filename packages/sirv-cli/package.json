@@ -4,10 +4,12 @@
   "description": "A lightweight CLI program to serve static sites~!",
   "repository": "lukeed/sirv",
   "license": "MIT",
-  "bin": "index.js",
   "files": [
     "*.js"
   ],
+  "bin": {
+    "sirv": "index.js"
+  },
   "author": {
     "name": "Luke Edwards",
     "email": "luke@lukeed.com",
