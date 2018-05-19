@@ -64,8 +64,8 @@ module.exports = function (dir, opts={}) {
 		let data = find(pathname, extensions);
 		if (!data) return next ? next() : notFound(res);
 
-		res.writeHead(200, data.headers);
 		setHeaders(res, pathname, data.stats);
+		res.writeHead(200, data.headers);
 
 		fs.createReadStream(data.abs).pipe(res);
 	}
