@@ -19,9 +19,9 @@
     "node": ">= 6"
   },
   "dependencies": {
-    "ansi-colors": "^2.0.1",
     "console-clear": "^1.1.0",
     "get-port": "^3.2.0",
+    "kleur": "^1.0.0",
     "local-access": "^1.0.1",
     "sade": "^1.4.0",
     "sirv": "^0.1.2",

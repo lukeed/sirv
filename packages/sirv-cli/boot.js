@@ -1,9 +1,9 @@
 const sirv = require('sirv');
+const colors = require('kleur');
 const { resolve } = require('path');
 const clear = require('console-clear');
 const { createServer } = require('http');
 const access = require('local-access');
-const colors = require('ansi-colors');
 const tinydate = require('tinydate');
 const toPort = require('get-port');
 
