@@ -52,7 +52,7 @@ module.exports = function (dir, opts={}) {
 		};
 		cc && (headers['cache-control'] = cc);
 		opts.etag && (headers['etag'] = toEtag(stats));
-		FILES['/' + str.replace(/[\\\/]/g, '/')] = { abs, stats, headers };
+		FILES['/' + str.replace(/\\+/g, '/')] = { abs, stats, headers };
 	});
 
 	let notFound = opts.onNoMatch || is404;
