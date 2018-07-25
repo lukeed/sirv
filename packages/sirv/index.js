@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { join } = require('path');
+const { join, sep } = require('path');
 const tglob = require('tiny-glob/sync');
 const parseurl = require('parseurl');
 const mime = require('mime/lite');
@@ -52,7 +52,7 @@ module.exports = function (dir, opts={}) {
 		};
 		cc && (headers['cache-control'] = cc);
 		opts.etag && (headers['etag'] = toEtag(stats));
-		FILES['/' + str] = { abs, stats, headers };
+		FILES['/' + str.replace(sep, '/')] = { abs, stats, headers };
 	});
 
 	let notFound = opts.onNoMatch || is404;
