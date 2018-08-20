@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { join } = require('path');
+const { join, resolve } = require('path');
 const tglob = require('tiny-glob/sync');
 const parseurl = require('parseurl');
 const mime = require('mime/lite');
@@ -39,6 +39,22 @@ function is404(res) {
 }
 
 module.exports = function (dir, opts={}) {
+	dir = resolve(dir || '.');
+
+	let notFound = opts.onNoMatch || is404;
+	let setHeaders = opts.setHeaders || noop;
+	let extensions = opts.extensions || ['html', 'htm'];
+
+	if (opts.dev) {
+		return function (req, res, next) {
+			let uri = req.path || req.pathname || parseurl(req).pathname;
+			let arr = uri.includes('.') ? [uri] : toAssume(uri, extensions);
+			let file = arr.map(x => join(dir, x)).find(fs.existsSync);
+			if (!file) return next ? next() : notFound(res);
+			fs.createReadStream(file).pipe(res);
+		}
+	}
+
 	let cc = opts.maxAge && `public,max-age=${opts.maxAge}`;
 	cc && opts.immutable && (cc += ',immutable');
 
@@ -57,10 +73,6 @@ module.exports = function (dir, opts={}) {
 		opts.etag && (headers['etag'] = toEtag(stats));
 		FILES['/' + str.replace(/\\+/g, '/')] = { abs, stats, headers };
 	});
-
-	let notFound = opts.onNoMatch || is404;
-	let setHeaders = opts.setHeaders || noop;
-	let extensions = opts.extensions || ['html', 'htm'];
 
 	return function (req, res, next) {
 		let pathname = req.path || req.pathname || parseurl(req).pathname;
