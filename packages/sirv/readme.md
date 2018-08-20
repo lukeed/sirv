@@ -56,6 +56,16 @@ Default: `.`
 
 The directory from which to read and serve assets. It is resolved to an absolute path &mdash; you must provide an absolute path yourself if `process.cwd()` is not the correct assumption.
 
+#### opts.dev
+Type: `Boolean`<br>
+Default: `false`
+
+Enable "dev" mode, which disables/skips caching. Instead, `sirv` will traverse the file system ***on every request***.
+
+Additionally, `dev` mode will ignore `maxAge`, `immutable`, `etag`, and `setHeaders` as these options are geared towards production response headers.
+
+> **Important:** Do not use `dev` mode in production!
+
 #### opts.etag
 Type: `Boolean`<br>
 Default: `false`
