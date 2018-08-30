@@ -51,6 +51,7 @@ module.exports = function (dir, opts={}) {
 			let arr = uri.includes('.') ? [uri] : toAssume(uri, extensions);
 			let file = arr.map(x => join(dir, x)).find(fs.existsSync);
 			if (!file) return next ? next() : notFound(res);
+			res.setHeader('content-type', mime.getType(file));
 			fs.createReadStream(file).pipe(res);
 		}
 	}
