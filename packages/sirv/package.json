@@ -1,6 +1,6 @@
 {
   "name": "sirv",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "The optimized & lightweight middleware for serving requests to static assets",
   "repository": "lukeed/sirv",
   "license": "MIT",
