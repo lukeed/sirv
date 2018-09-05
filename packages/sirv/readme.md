@@ -117,6 +117,31 @@ A custom function to append or change any headers on the outgoing response. Ther
 Its signature is `(res, pathname, stats)`, where `res` is the `ServerResponse`, `pathname` is incoming request path (stripped of queries), and `stats` is the file's result from [`fs.statSync`](https://nodejs.org/api/fs.html#fs_fs_statsync_path).
 
 
+## SPA example
+
+```js
+const sirv = require('sirv');
+const polka = require('polka');
+const compress = require('compression')();
+
+// Init `sirv` handler
+const assets = sirv('public', {
+  maxAge: 31536000, // 1Y
+  immutable: true,
+  
+  // Use index.html ('/') when requested uri doesn't exist
+  onNoMatch = res => fn({ path:'/' }, res, r => (r.statusCode=404,r.end())),
+});
+
+polka()
+  .use(compress, assets)
+  .use('/api', require('./api'))
+  .listen(3000)
+  .then(() => {
+    console.log('> Ready on localhost:3000~!');
+  });
+```
+
 ## License
 
 MIT © [Luke Edwards](https://lukeed.com)
