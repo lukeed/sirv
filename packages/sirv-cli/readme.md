@@ -78,6 +78,7 @@ $ sirv start --help
     -c, --cors         Enable "CORS" headers to allow any origin requestor
     -m, --maxage       Enable "Cache-Control" header & define its "max-age" value (sec)
     -i, --immutable    Enable the "immutable" directive for "Cache-Control" header
+    -s, --single       Serve single-page applications
     -q, --quiet        Disable logging to terminal
     -p, --port         Port to listen  (default 5000)
     -h, --help         Displays this message
