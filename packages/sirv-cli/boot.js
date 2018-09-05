@@ -62,7 +62,7 @@ module.exports = function (dir, opts) {
 			if (err) throw err;
 			if (opts.quiet) return;
 
-			clear(true); // wipe screen, but don't wipe scrollback history
+			clear(true); // wipe screen, but not history
 			let { local, network } = access({ port, https });
 			stdout.write('\n' + PAD + colors.green('Your application is ready~! 🚀\n\n'));
 			isOther && stdout.write(PAD + colors.italic.dim(`➡ Port ${opts.port} is taken; using ${port} instead\n\n`));
