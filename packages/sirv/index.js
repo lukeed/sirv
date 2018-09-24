@@ -47,7 +47,7 @@ module.exports = function (dir, opts={}) {
 
 	if (opts.dev) {
 		return function (req, res, next) {
-			let uri = decodeURIComponent(req.path || req.pathname || parseurl(req).pathname);
+			let uri = req.path || req.pathname || parseurl(req).pathname;
 			let arr = uri.includes('.') ? [uri] : toAssume(uri, extensions);
 			let file = arr.map(x => join(dir, x)).find(fs.existsSync);
 			if (!file) return next ? next() : notFound(res);
@@ -72,7 +72,7 @@ module.exports = function (dir, opts={}) {
 		};
 		cc && (headers['cache-control'] = cc);
 		opts.etag && (headers['etag'] = toEtag(stats));
-		FILES['/' + encodeURIComponent(str.replace(/\\+/g, '/'))] = { abs, stats, headers };
+		FILES['/' + str.replace(/\\+/g, '/')] = { abs, stats, headers };
 	});
 
 	return function (req, res, next) {
