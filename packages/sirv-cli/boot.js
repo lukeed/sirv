@@ -15,7 +15,7 @@ function toTime() {
 }
 
 function toMS(arr) {
-	return colors.white.bold(`${(arr[1] / 1e6).toFixed(2)}ms`);
+	return colors.white().bold(`${(arr[1] / 1e6).toFixed(2)}ms`);
 }
 
 function toCode(code) {
@@ -65,7 +65,7 @@ module.exports = function (dir, opts) {
 			clear(true); // wipe screen, but not history
 			let { local, network } = access({ port, https });
 			stdout.write('\n' + PAD + colors.green('Your application is ready~! 🚀\n\n'));
-			isOther && stdout.write(PAD + colors.italic.dim(`➡ Port ${opts.port} is taken; using ${port} instead\n\n`));
+			isOther && stdout.write(PAD + colors.italic().dim(`➡ Port ${opts.port} is taken; using ${port} instead\n\n`));
 			stdout.write(PAD + `${colors.bold('- Local:')}      ${local}\n`);
 			stdout.write(PAD + `${colors.bold('- Network:')}    ${network}\n`);
 			let border = '─'.repeat(Math.min(stdout.columns, 36) / 2);
