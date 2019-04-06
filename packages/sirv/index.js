@@ -47,7 +47,7 @@ module.exports = function (dir, opts={}) {
 
 	if (opts.dev) {
 		return function (req, res, next) {
-			let uri = req.path || req.pathname || parser(req).pathname;
+			let uri = decodeURIComponent(req.path || req.pathname || parser(req).pathname);
 			let arr = uri.includes('.') ? [uri] : toAssume(uri, extensions);
 			let file = arr.map(x => join(dir, x)).find(fs.existsSync);
 			if (!file) return next ? next() : notFound(res);
@@ -76,7 +76,7 @@ module.exports = function (dir, opts={}) {
 	});
 
 	return function (req, res, next) {
-		let pathname = req.path || req.pathname || parser(req).pathname;
+		let pathname = decodeURIComponent(req.path || req.pathname || parser(req).pathname);
 		let data = find(pathname, extensions);
 		if (!data) return next ? next() : notFound(res);
 
