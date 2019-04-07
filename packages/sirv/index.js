@@ -56,8 +56,8 @@ module.exports = function (dir, opts={}) {
 		}
 	}
 
-	let cc = opts.maxAge && `public,max-age=${opts.maxAge}`;
 	cc && opts.immutable && (cc += ',immutable');
+	let cc = opts.maxAge != null && `public,max-age=${opts.maxAge}`;
 
 	opts.cwd = dir;
 	let abs, stats, headers;
