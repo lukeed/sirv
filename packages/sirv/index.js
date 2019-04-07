@@ -41,8 +41,7 @@ function is404(res) {
 module.exports = function (dir, opts={}) {
 	dir = resolve(dir || '.');
 
-	let notFound = opts.onNoMatch || is404;
-	let setHeaders = opts.setHeaders || noop;
+	let isNotFound = opts.onNoMatch || is404;
 	let extensions = opts.extensions || ['html', 'htm'];
 
 	if (opts.dev) {
@@ -50,14 +49,15 @@ module.exports = function (dir, opts={}) {
 			let uri = decodeURIComponent(req.path || req.pathname || parser(req).pathname);
 			let arr = uri.includes('.') ? [uri] : toAssume(uri, extensions);
 			let file = arr.map(x => join(dir, x)).find(fs.existsSync);
-			if (!file) return next ? next() : notFound(res);
-			res.setHeader('content-type', mime.getType(file));
+			if (!file) return next ? next() : isNotFound(res);
+			res.setHeader('Content-Type', mime.getType(file));
 			fs.createReadStream(file).pipe(res);
 		}
 	}
 
-	cc && opts.immutable && (cc += ',immutable');
+	let setHeaders = opts.setHeaders || noop;
 	let cc = opts.maxAge != null && `public,max-age=${opts.maxAge}`;
+	if (cc && opts.immutable) cc += ',immutable';
 
 	opts.cwd = dir;
 	let abs, stats, headers;
@@ -66,19 +66,19 @@ module.exports = function (dir, opts={}) {
 		abs = join(dir, str);
 		stats = fs.statSync(abs);
 		headers = {
-			'content-length': stats.size,
-			'content-type': mime.getType(str),
-			'last-modified': stats.mtime.toUTCString()
+			'Content-Length': stats.size,
+			'Content-Type': mime.getType(str),
+			'Last-Modified': stats.mtime.toUTCString()
 		};
-		cc && (headers['cache-control'] = cc);
-		opts.etag && (headers['etag'] = toEtag(stats));
+		if (cc) headers['Cache-Control'] = cc;
+		if (opts.etag) headers['ETag'] = toEtag(stats);
 		FILES['/' + str.replace(/\\+/g, '/')] = { abs, stats, headers };
 	});
 
 	return function (req, res, next) {
 		let pathname = decodeURIComponent(req.path || req.pathname || parser(req).pathname);
 		let data = find(pathname, extensions);
-		if (!data) return next ? next() : notFound(res);
+		if (!data) return next ? next() : isNotFound(res);
 
 		setHeaders(res, pathname, data.stats);
 		res.writeHead(200, data.headers);
