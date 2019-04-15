@@ -47,6 +47,30 @@ function list(dir, fn, pre='') {
 	}
 }
 
+function send(req, res, file, stats, headers={}) {
+	let code=200, opts={};
+
+	if (req.headers.range) {
+		code = 206;
+		let [x, y] = req.headers.range.replace('bytes=', '').split('-');
+		let end = opts.end = parseInt(y, 10) || stats.size - 1;
+		let start = opts.start = parseInt(x, 10) || 0;
+
+		if (start >= stats.size || end >= stats.size) {
+			res.setHeader('Content-Range', `bytes */${stats.size}`);
+			res.statusCode = 416;
+			return res.end();
+		}
+
+		headers['Content-Range'] = `bytes ${start}-${end}/${stats.size}`;
+		headers['Content-Length'] = (end - start + 1);
+		headers['Accept-Ranges'] = 'bytes';
+	}
+
+	res.writeHead(code, headers);
+	fs.createReadStream(file, opts).pipe(res);
+}
+
 module.exports = function (dir, opts={}) {
 	dir = resolve(dir || '.');
 
@@ -55,12 +79,18 @@ module.exports = function (dir, opts={}) {
 
 	if (opts.dev) {
 		return function (req, res, next) {
+			let [start=0, end=Infinity] = (req.headers.range || '').replace('bytes=', '').split('-');
 			let uri = decodeURIComponent(req.path || req.pathname || parser(req).pathname);
 			let arr = uri.includes('.') ? [uri] : toAssume(uri, extensions);
 			let file = arr.map(x => join(dir, x)).find(fs.existsSync);
 			if (!file) return next ? next() : isNotFound(res);
-			res.setHeader('Content-Type', mime.getType(file));
-			fs.createReadStream(file).pipe(res);
+
+			let stats = fs.statSync(file);
+			send(req, res, file, stats, {
+				'Content-Type': mime.getType(file),
+				'Last-Modified': stats.mtime.toUTCString(),
+				'Content-Length': stats.size,
+			});
 		}
 	}
 
@@ -91,8 +121,6 @@ module.exports = function (dir, opts={}) {
 		if (!data) return next ? next() : isNotFound(res);
 
 		setHeaders(res, pathname, data.stats);
-		res.writeHead(200, data.headers);
-
-		fs.createReadStream(data.abs).pipe(res);
+		send(req, res, data.abs, data.stats, data.headers);
 	};
 }
