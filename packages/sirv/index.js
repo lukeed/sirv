@@ -1,6 +1,5 @@
 const fs = require('fs');
 const { join, resolve } = require('path');
-const tglob = require('tiny-glob/sync');
 const parser = require('@polka/url');
 const mime = require('mime/lite');
 
@@ -9,7 +8,9 @@ const noop = () => {};
 
 function toAssume(uri, extns) {
 	let i=0, x, len=uri.length - 1;
-	if (uri.charCodeAt(len) === 47) uri=uri.substring(0, len);
+	if (uri.charCodeAt(len) === 47) {
+		uri = uri.substring(0, len);
+	}
 
 	let arr=[], tmp=`${uri}/index`;
 	for (; i < extns.length; i++) {
@@ -30,12 +31,20 @@ function find(uri, extns) {
 	return data;
 }
 
-function toEtag(obj) {
-	return `W/"${obj.size.toString(16)}-${obj.mtime.getTime().toString(16)}"`;
-}
-
 function is404(res) {
 	return (res.statusCode=404,res.end());
+}
+
+function list(dir, fn, pre='') {
+	let i=0, abs, stats;
+	let arr = fs.readdirSync(dir);
+	for (; i < arr.length; i++) {
+		abs = join(dir, arr[i]);
+		stats = fs.statSync(abs);
+		stats.isDirectory()
+			? list(abs, fn, join(pre, arr[i]))
+			: fn(join(pre, arr[i]), abs, stats);
+	}
 }
 
 module.exports = function (dir, opts={}) {
@@ -59,20 +68,21 @@ module.exports = function (dir, opts={}) {
 	let cc = opts.maxAge != null && `public,max-age=${opts.maxAge}`;
 	if (cc && opts.immutable) cc += ',immutable';
 
-	opts.cwd = dir;
-	let abs, stats, headers;
-	opts.dot = !!opts.dotfiles;
-	tglob('**/*.*', opts).forEach(str => {
-		abs = join(dir, str);
-		stats = fs.statSync(abs);
-		headers = {
+	list(dir, (name, abs, stats) => {
+		if (!opts.dotfiles && name.charAt(0) === '.') {
+			return;
+		}
+
+		let headers = {
 			'Content-Length': stats.size,
-			'Content-Type': mime.getType(str),
-			'Last-Modified': stats.mtime.toUTCString()
+			'Content-Type': mime.getType(name),
+			'Last-Modified': stats.mtime.toUTCString(),
 		};
+
 		if (cc) headers['Cache-Control'] = cc;
-		if (opts.etag) headers['ETag'] = toEtag(stats);
-		FILES['/' + str.replace(/\\+/g, '/')] = { abs, stats, headers };
+		if (opts.etag) headers['ETag'] = `W/"${stats.size}-${stats.mtime.getTime()}"`;
+
+		FILES['/' + name.replace(/\\+/g, '/')] = { abs, stats, headers };
 	});
 
 	return function (req, res, next) {
@@ -84,5 +94,5 @@ module.exports = function (dir, opts={}) {
 		res.writeHead(200, data.headers);
 
 		fs.createReadStream(data.abs).pipe(res);
-	}
+	};
 }
