@@ -31,7 +31,7 @@ function find(uri, extns) {
 	return data;
 }
 
-function is404(res) {
+function is404(req, res) {
 	return (res.statusCode=404,res.end());
 }
 
@@ -83,7 +83,7 @@ module.exports = function (dir, opts={}) {
 			let uri = decodeURIComponent(req.path || req.pathname || parser(req).pathname);
 			let arr = uri.includes('.') ? [uri] : toAssume(uri, extensions);
 			let file = arr.map(x => join(dir, x)).find(fs.existsSync);
-			if (!file) return next ? next() : isNotFound(res);
+			if (!file) return next ? next() : isNotFound(req, res);
 
 			let stats = fs.statSync(file);
 			setHeaders(res, uri, stats);
@@ -118,7 +118,7 @@ module.exports = function (dir, opts={}) {
 	return function (req, res, next) {
 		let pathname = decodeURIComponent(req.path || req.pathname || parser(req).pathname);
 		let data = find(pathname, extensions);
-		if (!data) return next ? next() : isNotFound(res);
+		if (!data) return next ? next() : isNotFound(req, res);
 
 		setHeaders(res, pathname, data.stats);
 		send(req, res, data.abs, data.stats, data.headers);

@@ -105,7 +105,7 @@ Type: `Function`
 
 A custom function to run if a file cannot be found for a given request. <br>By default, `sirv` will send a basic `(404) Not found` response.
 
-The function receives the current `res <ServerResponse>` as its only argument.
+The function receives the current `req <IncomingMessage>, res <ServerResponse>` pair for as its two arguments.
 
 > **Note:** This won't run if a `next` callback has been provided to the middleware; see [`sirv`](#sirvdir-opts) description.
 
