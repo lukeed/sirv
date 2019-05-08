@@ -25,9 +25,8 @@ function toAssume(uri, extns) {
 function find(uri, extns) {
 	let i=0, data, arr=toAssume(uri, extns);
 	for (; i < arr.length; i++) {
-		if (data=FILES[arr[i]]) break;
+		if (data = FILES[arr[i]]) return data;
 	}
-	return data;
 }
 
 function is404(req, res) {
@@ -84,14 +83,14 @@ module.exports = function (dir, opts={}) {
 			while (file = arr.shift()) {
 				stats = fs.statSync(file);
 				if (stats.isDirectory()) continue;
-			setHeaders(res, uri, stats);
-			send(req, res, file, stats, {
-				'Content-Type': mime.getType(file),
-				'Last-Modified': stats.mtime.toUTCString(),
-				'Content-Length': stats.size,
-			});
+				setHeaders(res, uri, stats);
+				send(req, res, file, stats, {
+					'Content-Type': mime.getType(file),
+					'Last-Modified': stats.mtime.toUTCString(),
+					'Content-Length': stats.size,
+				});
+			}
 		}
-	}
 	}
 
 	let cc = opts.maxAge != null && `public,max-age=${opts.maxAge}`;
