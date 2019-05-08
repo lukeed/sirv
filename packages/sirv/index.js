@@ -23,7 +23,6 @@ function toAssume(uri, extns) {
 }
 
 function find(uri, extns) {
-	if (!!~uri.lastIndexOf('.')) return FILES[uri];
 	let i=0, data, arr=toAssume(uri, extns);
 	for (; i < arr.length; i++) {
 		if (data=FILES[arr[i]]) break;
@@ -80,12 +79,11 @@ module.exports = function (dir, opts={}) {
 
 	if (opts.dev) {
 		return function (req, res, next) {
-			let uri = decodeURIComponent(req.path || req.pathname || parser(req).pathname);
-			let arr = uri.includes('.') ? [uri] : toAssume(uri, extensions);
-			let file = arr.map(x => join(dir, x)).find(fs.existsSync);
-			if (!file) return next ? next() : isNotFound(req, res);
-
-			let stats = fs.statSync(file);
+			let stats, file, uri=decodeURIComponent(req.path || req.pathname || parser(req).pathname);
+			let arr = [uri].concat(toAssume(uri, extensions)).map(x => join(dir, x)).filter(fs.existsSync);
+			while (file = arr.shift()) {
+				stats = fs.statSync(file);
+				if (stats.isDirectory()) continue;
 			setHeaders(res, uri, stats);
 			send(req, res, file, stats, {
 				'Content-Type': mime.getType(file),
@@ -93,6 +91,7 @@ module.exports = function (dir, opts={}) {
 				'Content-Length': stats.size,
 			});
 		}
+	}
 	}
 
 	let cc = opts.maxAge != null && `public,max-age=${opts.maxAge}`;
@@ -117,7 +116,7 @@ module.exports = function (dir, opts={}) {
 
 	return function (req, res, next) {
 		let pathname = decodeURIComponent(req.path || req.pathname || parser(req).pathname);
-		let data = find(pathname, extensions);
+		let data = FILES[pathname] || find(pathname, extensions);
 		if (!data) return next ? next() : isNotFound(req, res);
 
 		setHeaders(res, pathname, data.stats);
