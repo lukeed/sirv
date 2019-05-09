@@ -84,12 +84,13 @@ module.exports = function (dir, opts={}) {
 				stats = fs.statSync(file);
 				if (stats.isDirectory()) continue;
 				setHeaders(res, uri, stats);
-				send(req, res, file, stats, {
+				return send(req, res, file, stats, {
 					'Content-Type': mime.getType(file),
 					'Last-Modified': stats.mtime.toUTCString(),
 					'Content-Length': stats.size,
 				});
 			}
+			return next ? next() : isNotFound(req, res);
 		}
 	}
 
