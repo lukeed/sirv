@@ -73,6 +73,7 @@ $ sirv start --help
     $ sirv start [dir] [options]
 
   Options
+    -D, --dev          Enable "dev" mode
     -e, --etag         Enable "Etag" header
     -d, --dotfiles     Enable dotfile asset requests
     -c, --cors         Enable "CORS" headers to allow any origin requestor
