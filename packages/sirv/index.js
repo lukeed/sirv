@@ -79,7 +79,10 @@ module.exports = function (dir, opts={}) {
 	if (opts.dev) {
 		return function (req, res, next) {
 			let stats, file, uri = req.path || parser(req, true).pathname;
-			let arr = [uri].concat(toAssume(uri, extensions)).map(x => join(dir, x)).filter(fs.existsSync);
+			let arr = [uri].concat(
+				toAssume(uri, extensions),
+				opts.single && uri !== '/' ? toAssume('/', extensions) : []
+			).map(x => join(dir, x)).filter(fs.existsSync);
 			while (file = arr.shift()) {
 				stats = fs.statSync(file);
 				if (stats.isDirectory()) continue;
@@ -116,7 +119,7 @@ module.exports = function (dir, opts={}) {
 
 	return function (req, res, next) {
 		let pathname = req.path || parser(req, true).pathname;
-		let data = FILES[pathname] || find(pathname, extensions);
+		let data = FILES[pathname] || find(pathname, extensions) || opts.single && find('/', extensions);
 		if (!data) return next ? next() : isNotFound(req, res);
 
 		setHeaders(res, pathname, data.stats);

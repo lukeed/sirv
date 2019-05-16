@@ -100,6 +100,29 @@ Appends the [`immutable` directive](https://developer.mozilla.org/en-US/docs/Web
 
 > **Note:** Requires `opts.maxAge` to contain a value!
 
+#### opts.single
+Type: `Boolean`<br>
+Default: `false`
+
+Treat the directory as a single-page application. When `true`, the directory's index page (eg, `index.html`) will be sent if the request asset does not exist.
+
+For example, if "/about" is requested but no variants of that file exist, then the response for "/" is sent instead:
+
+```js
+// Note: This is psuedo code to illustrate what's happening
+
+// Request: "/about"
+let file = find(['/about', '/about.html', '/about.htm', '/about/index.html', '/about.htm']);
+if (file) {
+  send(file);
+} else if (opts.single) {
+  file = find(['/', '/index.html', '/index.htm']);
+  send(file);
+} else {
+  // next() or 404
+}
+```
+
 #### opts.onNoMatch
 Type: `Function`
 
