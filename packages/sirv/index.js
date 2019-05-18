@@ -88,7 +88,7 @@ module.exports = function (dir, opts={}) {
 				if (stats.isDirectory()) continue;
 				setHeaders(res, uri, stats);
 				return send(req, res, file, stats, {
-					'Content-Type': mime.getType(file),
+					'Content-Type': mime.getType(file) || '',
 					'Last-Modified': stats.mtime.toUTCString(),
 					'Content-Length': stats.size,
 				});
@@ -107,7 +107,7 @@ module.exports = function (dir, opts={}) {
 
 		let headers = {
 			'Content-Length': stats.size,
-			'Content-Type': mime.getType(name),
+			'Content-Type': mime.getType(name) || '',
 			'Last-Modified': stats.mtime.toUTCString(),
 		};
 
