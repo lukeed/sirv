@@ -1,9 +1,10 @@
 const sirv = require('sirv');
 const colors = require('kleur');
+const semiver = require('semiver');
 const { resolve } = require('path');
+const { readFileSync } = require('fs');
+const laccess = require('local-access');
 const clear = require('console-clear');
-const { createServer } = require('http');
-const access = require('local-access');
 const tinydate = require('tinydate');
 const toPort = require('get-port');
 
@@ -24,6 +25,11 @@ function toCode(code) {
 	return colors[fn](code);
 }
 
+function exit(msg) {
+	process.stderr.write('\n' + PAD + colors.red().bold('ERROR: ') + msg + '\n\n');
+	process.exit(1);
+}
+
 module.exports = function (dir, opts) {
 	dir = resolve(dir || '.');
 	opts.maxAge = opts.m;
@@ -35,9 +41,29 @@ module.exports = function (dir, opts) {
 		}
 	}
 
+	let server;
 	let fn = sirv(dir, opts);
-	let server = createServer(fn);
 	let { hrtime, stdout } = process;
+
+	if (opts.http2) {
+		if (semiver(process.version.substring(1), '8.4.0') < 0) {
+			return exit('HTTP/2 requires Node v8.4.0 or greater');
+		}
+
+		if (!opts.key || !opts.cert) {
+			return exit('HTTP/2 requires "key" and "cert" values');
+		}
+
+		opts.cert = readFileSync(opts.cert);
+		opts.key = readFileSync(opts.key);
+		if (opts.cacert) {
+			opts.cacert = readFileSync(opts.cacert);
+		}
+
+		server = require('http2').createSecureServer(opts, fn);
+	} else {
+		server = require('http').createServer(fn);
+	}
 
 	if (!opts.quiet) {
 		let uri, dur, start, dash=colors.gray(' ─ ');
@@ -53,15 +79,15 @@ module.exports = function (dir, opts) {
 
 	opts.port = PORT || opts.port;
 	toPort(opts.port).then(port => {
-		let https = !!opts.ssl; // TODO
-		let isOther = port != opts.port;
 		let hostname = HOST || opts.host || '0.0.0.0';
+		let https = opts.http2 || !!opts.ssl; // TODO
+		let isOther = port != opts.port;
 		server.listen(port, hostname, err => {
 			if (err) throw err;
 			if (opts.quiet) return;
 
 			clear(true); // wipe screen, but not history
-			let { local, network } = access({ port, hostname, https });
+			let { local, network } = laccess({ port, hostname, https });
 			stdout.write('\n' + PAD + colors.green('Your application is ready~! 🚀\n\n'));
 			isOther && stdout.write(PAD + colors.italic().dim(`➡ Port ${opts.port} is taken; using ${port} instead\n\n`));
 			stdout.write(PAD + `${colors.bold('- Local:')}      ${local}\n`);

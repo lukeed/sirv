@@ -24,6 +24,7 @@
     "kleur": "^3.0.0",
     "local-access": "^1.0.1",
     "sade": "^1.4.0",
+    "semiver": "^1.0.0",
     "sirv": "^0.4.2",
     "tinydate": "^1.0.0"
   }
