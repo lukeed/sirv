@@ -59,8 +59,10 @@ $ sirv --help
     $ sirv build --cors --port 8080
     $ sirv start build --cors --port 8080
     $ sirv public --quiet --etag --maxage 31536000 --immutable
+    $ sirv public --http2 --key priv.pem --cert cert.pem
     $ sirv start public -qeim 31536000
     $ sirv --port 8080 --etag
+    $ sirv my-app --dev
 ```
 
 ```
@@ -74,11 +76,14 @@ $ sirv start --help
 
   Options
     -D, --dev          Enable "dev" mode
-    -e, --etag         Enable "Etag" header
+    -e, --etag         Enable "ETag" header
     -d, --dotfiles     Enable dotfile asset requests
     -c, --cors         Enable "CORS" headers to allow any origin requestor
     -m, --maxage       Enable "Cache-Control" header & define its "max-age" value (sec)
     -i, --immutable    Enable the "immutable" directive for "Cache-Control" header
+    -H, --http2        Enable the HTTP/2 protocol. Requires Node.js 8.4.0+
+    -C, --cert         Path to certificate file for HTTP/2 server
+    -K, --key          Path to certificate key for HTTP/2 server
     -s, --single       Serve single-page applications
     -q, --quiet        Disable logging to terminal
     -H, --host         Hostname to bind  (default localhost)
@@ -87,6 +92,19 @@ $ sirv start --help
 ```
 
 > **Note:** The `HOST` and `PORT` environment variables will override flag values.
+
+
+## HTTP/2
+
+Running a HTTP/2 server is available to users running Node.js v8.4.0 or later.<br>
+However, since no browsers support [unencrypted HTTP/2](https://http2.github.io/faq/#does-http2-require-encryption), you must provide `--key` and `--cert` options to `sirv-cli`. These are read and passed to [`http2.createSecureServer`](https://nodejs.org/api/http2.html#http2_http2_createsecureserver_options_onrequesthandler), which is necessary for browser clients to connect.
+
+You can generate a certificate and key for local development quickly with:
+
+```sh
+$ openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/CN=localhost' \
+  -keyout localhost-privkey.pem -out localhost-cert.pem
+```
 
 
 ## License
