@@ -57,13 +57,14 @@ module.exports = function (dir, opts) {
 
 	toPort(opts.port).then(port => {
 		let https = !!opts.ssl; // TODO
+		let hostname = opts.host;
 		let isOther = port !== opts.port;
-		server.listen(port, err => {
+		server.listen(port, hostname, err => {
 			if (err) throw err;
 			if (opts.quiet) return;
 
 			clear(true); // wipe screen, but not history
-			let { local, network } = access({ port, https });
+			let { local, network } = access({ port, hostname, https });
 			stdout.write('\n' + PAD + colors.green('Your application is ready~! 🚀\n\n'));
 			isOther && stdout.write(PAD + colors.italic().dim(`➡ Port ${opts.port} is taken; using ${port} instead\n\n`));
 			stdout.write(PAD + `${colors.bold('- Local:')}      ${local}\n`);
