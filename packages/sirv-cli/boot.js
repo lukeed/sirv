@@ -8,6 +8,7 @@ const tinydate = require('tinydate');
 const toPort = require('get-port');
 
 const PAD = '  ';
+const { HOST, PORT } = process.env;
 const stamp = tinydate('{HH}:{mm}:{ss}');
 
 function toTime() {
@@ -55,10 +56,11 @@ module.exports = function (dir, opts) {
 		});
 	}
 
+	opts.port = PORT || opts.port;
 	toPort(opts.port).then(port => {
 		let https = !!opts.ssl; // TODO
-		let hostname = opts.host;
-		let isOther = port !== opts.port;
+		let isOther = port != opts.port;
+		let hostname = HOST || opts.host;
 		server.listen(port, hostname, err => {
 			if (err) throw err;
 			if (opts.quiet) return;

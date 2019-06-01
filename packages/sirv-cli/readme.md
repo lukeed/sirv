@@ -86,6 +86,8 @@ $ sirv start --help
     -h, --help         Displays this message
 ```
 
+> **Note:** The `HOST` and `PORT` environment variables will override flag values.
+
 
 ## License
 
