@@ -81,8 +81,8 @@ $ sirv start --help
     -i, --immutable    Enable the "immutable" directive for "Cache-Control" header
     -s, --single       Serve single-page applications
     -q, --quiet        Disable logging to terminal
-    -H, --host         Hostname to listen  (default localhost)
-    -p, --port         Port to listen  (default 5000)
+    -H, --host         Hostname to bind  (default localhost)
+    -p, --port         Port to bind  (default 5000)
     -h, --help         Displays this message
 ```
 
