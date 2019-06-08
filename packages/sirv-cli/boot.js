@@ -37,7 +37,7 @@ module.exports = function (dir, opts) {
 	}
 
 	if (opts.single) {
-		opts.onNoMatch = (req, res) => (req.path='/',fn(req, res, r => (r.statusCode=404,r.end())));
+		opts.onNoMatch = (req, res) => (req.path='/',fn(req, res, () => (res.statusCode=404,res.end())));
 	}
 
 	fn = sirv(dir, opts);
