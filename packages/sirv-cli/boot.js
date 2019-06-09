@@ -29,6 +29,18 @@ module.exports = function (dir, opts) {
 	dir = resolve(dir || '.');
 	opts.maxAge = opts.m;
 
+	if (opts.proxy) {
+		let i = opts.proxy.indexOf(':');
+		if (i == - 1) throw new Error('missing ":" in proxy argument');
+		let url = new URL(opts.proxy.substring(i + 1));
+		opts.proxy = {
+			prefix: opts.proxy.substring(0, i),
+			hostname: url.hostname,
+			port: url.port,
+			path: url.pathname
+		};
+	}
+
 	if (opts.cors) {
 		opts.setHeaders = res => {
 			res.setHeader('Access-Control-Allow-Origin', '*');
@@ -48,7 +60,7 @@ module.exports = function (dir, opts) {
 		let uri, dur, start, dash=colors.gray(' ─ ');
 		server.on('request', (req, res) => {
 			start = hrtime();
-			req.once('end', _ => {
+			res.once('close', _ => {
 				dur = hrtime(start);
 				uri = req.originalUrl || req.url;
 				stdout.write(PAD + toTime() + toCode(res.statusCode) + dash + toMS(dur) + dash + uri + '\n');

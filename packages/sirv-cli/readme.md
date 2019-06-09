@@ -61,6 +61,7 @@ $ sirv --help
     $ sirv public --quiet --etag --maxage 31536000 --immutable
     $ sirv start public -qeim 31536000
     $ sirv --port 8080 --etag
+    $ sirv public --dev --proxy /api/:http://localhost:4000/
 ```
 
 ```
@@ -83,6 +84,7 @@ $ sirv start --help
     -q, --quiet        Disable logging to terminal
     -H, --host         Hostname to bind  (default localhost)
     -p, --port         Port to bind  (default 5000)
+    -P, --proxy        Enable reverse proxy (path:url)
     -h, --help         Displays this message
 ```
 
