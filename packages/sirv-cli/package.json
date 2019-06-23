@@ -23,7 +23,7 @@
     "get-port": "^3.2.0",
     "kleur": "^3.0.0",
     "local-access": "^1.0.1",
-    "sade": "^1.4.0",
+    "sade": "^1.6.0",
     "semiver": "^1.0.0",
     "sirv": "^0.4.2",
     "tinydate": "^1.0.0"
