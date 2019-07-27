@@ -76,12 +76,19 @@ module.exports = function (dir, opts={}) {
 	let extensions = opts.extensions || ['html', 'htm'];
 	let setHeaders = opts.setHeaders || noop;
 
+	let fallback = '/';
+	let isSPA = !!opts.single;
+	if (typeof opts.single === 'string') {
+		let idx = opts.single.lastIndexOf('.');
+		fallback += !!~idx ? opts.single.substring(0, idx) : opts.single;
+	}
+
 	if (opts.dev) {
 		return function (req, res, next) {
 			let stats, file, uri = req.path || parser(req, true).pathname;
 			let arr = [uri].concat(
 				toAssume(uri, extensions),
-				opts.single && uri !== '/' ? toAssume('/', extensions) : []
+				isSPA && uri !== fallback ? toAssume(fallback, extensions) : []
 			).map(x => join(dir, x)).filter(fs.existsSync);
 			while (file = arr.shift()) {
 				stats = fs.statSync(file);
@@ -119,7 +126,7 @@ module.exports = function (dir, opts={}) {
 
 	return function (req, res, next) {
 		let pathname = req.path || parser(req, true).pathname;
-		let data = FILES[pathname] || find(pathname, extensions) || opts.single && find('/', extensions);
+		let data = FILES[pathname] || find(pathname, extensions) || isSPA && find(fallback, extensions);
 		if (!data) return next ? next() : isNotFound(req, res);
 
 		setHeaders(res, pathname, data.stats);
