@@ -10,8 +10,8 @@
     "test": "tape tests/*.js | tap-spec"
   },
   "devDependencies": {
-    "lerna": "^2.8.0",
-    "tap-spec": "^4.1.1",
-    "tape": "^4.8.0"
+    "lerna": "3.16.4",
+    "tap-spec": "5.0.0",
+    "tape": "4.11.0"
   }
 }
