@@ -22,10 +22,23 @@ function toAssume(uri, extns) {
 	return arr;
 }
 
-function find(uri, extns) {
+function viaCache(uri, extns) {
 	let i=0, data, arr=toAssume(uri, extns);
 	for (; i < arr.length; i++) {
 		if (data = FILES[arr[i]]) return data;
+	}
+}
+
+function viaLocal(uri, extns, dir, isEtag) {
+	let i=0, arr=toAssume(uri, extns);
+	let abs, stats, name, headers;
+	for (; i < arr.length; i++) {
+		if (fs.existsSync(abs = join(dir, name=arr[i]))) {
+			stats = fs.statSync(abs);
+			if (stats.isDirectory()) continue;
+			headers = toHeaders(name, stats, isEtag);
+			return { abs, stats, headers };
+		}
 	}
 }
 
@@ -78,6 +91,18 @@ function isEncoding(name, type, headers) {
 	headers['Content-Type'] = mime.getType(name.replace(/\.([^.]*)$/, '')) || '';
 }
 
+function toHeaders(name, stats, isEtag) {
+	let headers = {
+		'Content-Length': stats.size,
+		'Content-Type': mime.getType(name) || '',
+		'Last-Modified': stats.mtime.toUTCString(),
+	};
+	if (isEtag) headers['ETag'] = `W/"${stats.size}-${stats.mtime.getTime()}"`;
+	if (/\.br$/.test(name)) isEncoding(name, 'brotli', headers);
+	if (/\.gz$/.test(name)) isEncoding(name, 'gzip', headers);
+	return headers;
+}
+
 module.exports = function (dir, opts={}) {
 	dir = resolve(dir || '.');
 
@@ -85,55 +110,25 @@ module.exports = function (dir, opts={}) {
 	let setHeaders = opts.setHeaders || noop;
 
 	let extensions = opts.extensions || ['html', 'htm'];
-	let brots = opts.brotli && extensions.map(x => `${x}.br`).concat('br');
 	let gzips = opts.gzip && extensions.map(x => `${x}.gz`).concat('gz');
+	let brots = opts.brotli && extensions.map(x => `${x}.br`).concat('br');
 
 	let fallback = '/';
+	let isEtag = !!opts.etag;
 	let isSPA = !!opts.single;
 	if (typeof opts.single === 'string') {
 		let idx = opts.single.lastIndexOf('.');
 		fallback += !!~idx ? opts.single.substring(0, idx) : opts.single;
 	}
 
-	if (opts.dev) {
-		return function (req, res, next) {
-			let stats, file, uri = req.path || parser(req, true).pathname;
-			let arr = [uri].concat(
-				toAssume(uri, extensions),
-				isSPA && uri !== fallback ? toAssume(fallback, extensions) : []
-			).map(x => join(dir, x)).filter(fs.existsSync);
-			while (file = arr.shift()) {
-				stats = fs.statSync(file);
-				if (stats.isDirectory()) continue;
-				setHeaders(res, uri, stats);
-				return send(req, res, file, stats, {
-					'Content-Type': mime.getType(file) || '',
-					'Last-Modified': stats.mtime.toUTCString(),
-					'Content-Length': stats.size,
-				});
-			}
-			return next ? next() : isNotFound(req, res);
-		}
-	}
-
 	let cc = opts.maxAge != null && `public,max-age=${opts.maxAge}`;
 	if (cc && opts.immutable) cc += ',immutable';
 
 	list(dir, (name, abs, stats) => {
-		if (!opts.dotfiles && name.charAt(0) === '.') {
-			return;
-		}
+		if (!opts.dotfiles && name.charAt(0) === '.') return;
 
-		let headers = {
-			'Content-Length': stats.size,
-			'Content-Type': mime.getType(name) || '',
-			'Last-Modified': stats.mtime.toUTCString(),
-		};
-
+		let headers = toHeaders(name, stats, isEtag);
 		if (cc) headers['Cache-Control'] = cc;
-		if (opts.etag) headers['ETag'] = `W/"${stats.size}-${stats.mtime.getTime()}"`;
-		if (/\.br$/.test(name)) isEncoding(name, 'brotli', headers);
-		if (/\.gz$/.test(name)) isEncoding(name, 'gzip', headers);
 
 		FILES['/' + name.replace(/\\+/g, '/')] = { abs, stats, headers };
 	});
@@ -145,8 +140,9 @@ module.exports = function (dir, opts={}) {
 		if (brots && /(br|brotli)/i.test(val)) extns=brots.concat(extns);
 		extns = extns.concat('', extensions); // [...br, ...gz, orig, ...exts]
 
+		let fn = opts.dev ? viaLocal : viaCache;
 		let pathname = req.path || parser(req, true).pathname;
-		let data = find(pathname, extns) || isSPA && find(fallback, extns);
+		let data = fn(pathname, extns, dir, isEtag) || isSPA && fn(fallback, extns, dir, isEtag);
 		if (!data) return next ? next() : isNotFound(req, res);
 
 		setHeaders(res, pathname, data.stats);
