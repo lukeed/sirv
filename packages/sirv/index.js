@@ -14,7 +14,7 @@ function toAssume(uri, extns) {
 
 	let arr=[], tmp=`${uri}/index`;
 	for (; i < extns.length; i++) {
-		x = '.' + extns[i];
+		x = extns[i] ? `.${extns[i]}` : '';
 		if (uri) arr.push(uri + x);
 		arr.push(tmp + x);
 	}
@@ -73,12 +73,20 @@ function send(req, res, file, stats, headers={}) {
 	fs.createReadStream(file, opts).pipe(res);
 }
 
+function isEncoding(name, type, headers) {
+	headers['Content-Encoding'] = type;
+	headers['Content-Type'] = mime.getType(name.replace(/\.([^.]*)$/, '')) || '';
+}
+
 module.exports = function (dir, opts={}) {
 	dir = resolve(dir || '.');
 
 	let isNotFound = opts.onNoMatch || is404;
-	let extensions = opts.extensions || ['html', 'htm'];
 	let setHeaders = opts.setHeaders || noop;
+
+	let extensions = opts.extensions || ['html', 'htm'];
+	let brots = opts.brotli && extensions.map(x => `${x}.br`).concat('br');
+	let gzips = opts.gzip && extensions.map(x => `${x}.gz`).concat('gz');
 
 	let fallback = '/';
 	let isSPA = !!opts.single;
@@ -124,13 +132,21 @@ module.exports = function (dir, opts={}) {
 
 		if (cc) headers['Cache-Control'] = cc;
 		if (opts.etag) headers['ETag'] = `W/"${stats.size}-${stats.mtime.getTime()}"`;
+		if (/\.br$/.test(name)) isEncoding(name, 'brotli', headers);
+		if (/\.gz$/.test(name)) isEncoding(name, 'gzip', headers);
 
 		FILES['/' + name.replace(/\\+/g, '/')] = { abs, stats, headers };
 	});
 
 	return function (req, res, next) {
+		let extns = [];
+		let val = req.headers['accept-encoding'] || '';
+		if (gzips && val.includes('gzip')) extns=gzips.concat(extns);
+		if (brots && /(br|brotli)/i.test(val)) extns=brots.concat(extns);
+		extns = extns.concat('', extensions); // [...br, ...gz, orig, ...exts]
+
 		let pathname = req.path || parser(req, true).pathname;
-		let data = FILES[pathname] || find(pathname, extensions) || isSPA && find(fallback, extensions);
+		let data = find(pathname, extns) || isSPA && find(fallback, extns);
 		if (!data) return next ? next() : isNotFound(req, res);
 
 		setHeaders(res, pathname, data.stats);
