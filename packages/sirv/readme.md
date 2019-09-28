@@ -33,8 +33,8 @@ const assets = sirv('public', {
 polka()
   .use(compress, assets)
   .use('/api', require('./api'))
-  .listen(3000)
-  .then(() => {
+  .listen(3000, err => {
+    if (err) throw err;
     console.log('> Ready on localhost:3000~!');
   });
 ```
