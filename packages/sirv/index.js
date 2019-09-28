@@ -46,7 +46,11 @@ function list(dir, fn, pre='') {
 }
 
 function send(req, res, file, stats, headers={}) {
-	let code=200, opts={};
+	let code=200, tmp, opts={}
+
+	if (tmp = res.getHeader('content-type')) {
+		headers['Content-Type'] = tmp;
+	}
 
 	if (req.headers.range) {
 		code = 206;
