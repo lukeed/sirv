@@ -37,6 +37,7 @@ function viaLocal(uri, extns, dir, isEtag) {
 			stats = fs.statSync(abs);
 			if (stats.isDirectory()) continue;
 			headers = toHeaders(name, stats, isEtag);
+			headers['Cache-Control'] = 'no-store';
 			return { abs, stats, headers };
 		}
 	}
