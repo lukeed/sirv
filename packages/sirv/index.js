@@ -1,5 +1,6 @@
 const fs = require('fs');
 const { join, resolve } = require('path');
+const list = require('totalist/sync');
 const parser = require('@polka/url');
 const mime = require('mime/lite');
 
@@ -45,18 +46,6 @@ function viaLocal(uri, extns, dir, isEtag) {
 
 function is404(req, res) {
 	return (res.statusCode=404,res.end());
-}
-
-function list(dir, fn, pre='') {
-	let i=0, abs, stats;
-	let arr = fs.readdirSync(dir);
-	for (; i < arr.length; i++) {
-		abs = join(dir, arr[i]);
-		stats = fs.statSync(abs);
-		stats.isDirectory()
-			? list(abs, fn, join(pre, arr[i]))
-			: fn(join(pre, arr[i]), abs, stats);
-	}
 }
 
 function send(req, res, file, stats, headers={}) {
