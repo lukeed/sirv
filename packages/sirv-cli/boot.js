@@ -77,9 +77,15 @@ module.exports = function (dir, opts) {
 	}
 
 	opts.port = PORT || opts.port;
+<<<<<<< HEAD
 	toPort(opts.port).then(port => {
 		let hostname = HOST || opts.host || '0.0.0.0';
 		let https = opts.http2 || !!opts.ssl; // TODO
+=======
+	let hostname = HOST || opts.host || '0.0.0.0';
+	toPort({ host: hostname, port: opts.port }).then(port => {
+		let https = !!opts.ssl; // TODO
+>>>>>>> 01616eb... fix(sirv-cli): use `host` for port availability
 		let isOther = port != opts.port;
 		server.listen(port, hostname, err => {
 			if (err) throw err;
