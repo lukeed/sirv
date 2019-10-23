@@ -1,6 +1,6 @@
 {
   "name": "sirv-cli",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "A lightweight CLI program to serve static sites~!",
   "repository": "lukeed/sirv",
   "license": "MIT",
