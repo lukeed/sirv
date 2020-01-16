@@ -54,11 +54,10 @@ module.exports = function (dir, opts) {
 			return exit('HTTP/2 requires "key" and "cert" values');
 		}
 
-		opts.cert = readFileSync(opts.cert);
 		opts.key = readFileSync(opts.key);
-		if (opts.cacert) {
-			opts.cacert = readFileSync(opts.cacert);
-		}
+		opts.cert = readFileSync(opts.cert);
+		if (opts.cacert) opts.cacert = readFileSync(opts.cacert);
+		if (opts.pass) opts.passphrase = opts.pass;
 
 		server = require('http2').createSecureServer(opts, fn);
 	} else {
