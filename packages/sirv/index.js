@@ -45,6 +45,10 @@ function viaLocal(uri, extns, dir, isEtag) {
 	}
 }
 
+function isAsset(assets, path) {
+	return !!assets && assets.some(pattern => path.startsWith(pattern));
+}
+
 function is404(req, res) {
 	return (res.statusCode=404,res.end());
 }
@@ -134,7 +138,7 @@ export default function (dir, opts={}) {
 
 		let fn = opts.dev ? viaLocal : viaCache;
 		let pathname = req.path || parser(req, true).pathname;
-		let data = fn(pathname, extns, dir, isEtag) || isSPA && fn(fallback, extns, dir, isEtag);
+		let data = fn(pathname, extns, dir, isEtag) || isSPA && !isAsset(opts.assets, pathname) && fn(fallback, extns, dir, isEtag);
 		if (!data) return next ? next() : isNotFound(req, res);
 
 		if (isEtag && req.headers['if-none-match'] === data.headers['ETag']) {

@@ -32,6 +32,7 @@ help('--help', () => {
         -K, --key          Path to certificate key for HTTP/2 server
         -P, --pass         Passphrase to decrypt a certificate key
         -s, --single       Serve single-page applications
+        -a, --assets       Prefix for the asset files of single-page applications
         -q, --quiet        Disable logging to terminal
         -H, --host         Hostname to bind  (default localhost)
         -p, --port         Port to bind  (default 5000)

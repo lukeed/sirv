@@ -61,6 +61,7 @@ $ sirv --help
     $ sirv public --quiet --etag --maxage 31536000 --immutable
     $ sirv public --http2 --key priv.pem --cert cert.pem
     $ sirv start public -qeim 31536000
+    $ sirv start public --assets /static/
     $ sirv --port 8080 --etag
     $ sirv my-app --dev
 ```
@@ -85,6 +86,7 @@ $ sirv start --help
     -C, --cert         Path to certificate file for HTTP/2 server
     -K, --key          Path to certificate key for HTTP/2 server
     -s, --single       Serve single-page applications
+    -a, --assets       Prefix for the asset files of single-page applications
     -q, --quiet        Disable logging to terminal
     -H, --host         Hostname to bind  (default localhost)
     -p, --port         Port to bind  (default 5000)
