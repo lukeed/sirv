@@ -135,6 +135,13 @@ module.exports = function (dir, opts={}) {
 		let data = fn(pathname, extns, dir, isEtag) || isSPA && fn(fallback, extns, dir, isEtag);
 		if (!data) return next ? next() : isNotFound(req, res);
 
+		const etag = opts.etag && req.headers['if-none-match'];
+		if (etag && etag === data.headers['ETag']) {
+			res.writeHead(304);
+			res.end();
+			return;
+		}
+
 		setHeaders(res, pathname, data.stats);
 		send(req, res, data.abs, data.stats, data.headers);
 	};
