@@ -116,7 +116,8 @@ module.exports = function (dir, opts={}) {
 	if (cc && opts.immutable) cc += ',immutable';
 
 	list(dir, (name, abs, stats) => {
-		if (!opts.dotfiles && /(^\.|[\\+|\/+]\.)/.test(name)) return;
+		if (opts.filter && !opts.filter(name, abs, stats)) return;
+		else if (!opts.dotfiles && /(^\.|[\\+|\/+]\.)/.test(name)) return;
 
 		let headers = toHeaders(name, stats, isEtag);
 		if (cc) headers['Cache-Control'] = cc;

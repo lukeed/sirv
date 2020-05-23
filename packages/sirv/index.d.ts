@@ -14,6 +14,7 @@ declare module 'sirv' {
 		single?: string | boolean;
 		onNoMatch?: (req: IncomingMessage, res: ServerResponse) => void;
 		setHeaders?: (res: ServerResponse, pathname: string, stats: Stats) => void;
+		filter?: (relPath: string, absPath: string, stats: Stats) => boolean;
 	}
 
 	export default function (dir?: string, opts?: Options): RequestHandler;
