@@ -1,4 +1,4 @@
-# sirv [![Build Status](https://travis-ci.org/lukeed/sirv.svg?branch=master)](https://travis-ci.org/lukeed/sirv)
+# sirv ![CI](https://github.com/lukeed/sirv/workflows/CI/badge.svg?branch=master)
 
 > The optimized and lightweight middleware for serving requests to static assets
 

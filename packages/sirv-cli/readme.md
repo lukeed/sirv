@@ -8,8 +8,8 @@
   <a href="https://npmjs.org/package/sirv-cli">
     <img src="https://img.shields.io/npm/v/sirv-cli.svg" alt="version" />
   </a>
-  <a href="https://travis-ci.org/lukeed/sirv">
-    <img src="https://img.shields.io/travis/lukeed/sirv.svg" alt="travis" />
+  <a href="https://github.com/lukeed/sirv/actions?query=workflow%3ACI+branch%3Amaster">
+    <img src="https://github.com/lukeed/sirv/workflows/CI/badge.svg?branch=master&event=push" alt="CI" />
   </a>
   <a href="https://npmjs.org/package/sirv-cli">
     <img src="https://img.shields.io/npm/dm/sirv-cli.svg" alt="downloads" />
