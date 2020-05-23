@@ -1,8 +1,8 @@
-const fs = require('fs');
-const { join, normalize, resolve } = require('path');
-const list = require('totalist/sync');
-const parser = require('@polka/url');
-const mime = require('mime/lite');
+import * as fs from 'fs';
+import { join, normalize, resolve } from 'path';
+import list from 'totalist/sync';
+import parser from '@polka/url';
+import mime from 'mime/lite';
 
 const FILES = {};
 const noop = () => {};
@@ -94,7 +94,7 @@ function toHeaders(name, stats, isEtag) {
 	return headers;
 }
 
-module.exports = function (dir, opts={}) {
+export default function (dir, opts={}) {
 	dir = resolve(dir || '.');
 
 	let isNotFound = opts.onNoMatch || is404;
