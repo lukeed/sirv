@@ -1,6 +1,6 @@
 {
   "name": "sirv-cli",
-  "version": "1.0.0-next.4",
+  "version": "1.0.0-next.5",
   "description": "A lightweight CLI program to serve static sites~!",
   "repository": "lukeed/sirv",
   "license": "MIT",
@@ -25,7 +25,7 @@
     "local-access": "^1.0.1",
     "sade": "^1.6.0",
     "semiver": "^1.0.0",
-    "sirv": "^1.0.0-next.4",
+    "sirv": "^1.0.0-next.5",
     "tinydate": "^1.0.0"
   }
 }
