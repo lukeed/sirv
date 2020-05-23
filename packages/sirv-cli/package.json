@@ -16,7 +16,7 @@
     "url": "https://lukeed.com"
   },
   "engines": {
-    "node": ">= 6"
+    "node": ">= 10"
   },
   "dependencies": {
     "console-clear": "^1.1.0",
