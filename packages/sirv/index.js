@@ -82,7 +82,7 @@ module.exports = function (dir, opts={}) {
 			let arr = [uri]
 				.concat(toAssume(uri, extensions))
 				.map(x => resolve(dir, x))
-				.filter(x => x.substring(0, dir.length) === dir && fs.existsSync(x));
+				.filter(x => x.startsWith(dir) && fs.existsSync(x));
 
 			while (file = arr.shift()) {
 				stats = fs.statSync(file);
