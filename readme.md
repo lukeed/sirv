@@ -68,6 +68,10 @@ sirv
     Transfer/sec:      4.42MB
 ```
 
+## Notice
+
+There is zero relationship between `sirv.com` and this module or its author.
+
 
 ## License
 
