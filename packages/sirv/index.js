@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { join, resolve } = require('path');
+const { join, resolve, normalize } = require('path');
 const parser = require('@polka/url');
 const mime = require('mime/lite');
 
@@ -79,7 +79,11 @@ module.exports = function (dir, opts={}) {
 	if (opts.dev) {
 		return function (req, res, next) {
 			let stats, file, uri=decodeURIComponent(req.path || req.pathname || parser(req).pathname);
-			let arr = [uri].concat(toAssume(uri, extensions)).map(x => join(dir, x)).filter(fs.existsSync);
+			let arr = [uri]
+				.concat(toAssume(uri, extensions))
+				.map(x => normalize(join(dir, x)))
+				.filter(x => x.substring(0, dir.length) === dir && fs.existsSync(x));
+
 			while (file = arr.shift()) {
 				stats = fs.statSync(file);
 				if (stats.isDirectory()) continue;
