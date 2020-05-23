@@ -8,7 +8,7 @@
   "scripts": {
     "pretest": "lerna bootstrap",
     "build": "lerna exec bundt index.js",
-    "test": "uvu -r esm tests"
+    "test": "uvu -r esm tests -i helpers"
   },
   "devDependencies": {
     "bundt": "1.0.1",
