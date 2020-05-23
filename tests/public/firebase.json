@@ -1,0 +1,26 @@
+{
+  "headers": [
+    {
+      "source": "/**.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        },
+        {
+          "key": "Link",
+          "value": "</foo.js>; rel=preload; as=script, </bar.js>; rel=preload; as=script, </baz.js>; rel=preload; as=script, </foo.css>; rel=preload; as=style, </foo.txt>; rel=preload; as=text"
+        }
+      ]
+    }
+  ]
+}
