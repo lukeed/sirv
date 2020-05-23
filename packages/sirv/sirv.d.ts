@@ -1,4 +1,4 @@
-declare module 'sirv' {
+declare namespace sirv {
 	import type { Stats } from 'fs';
 	import type { IncomingMessage, ServerResponse } from 'http';
 
@@ -16,5 +16,7 @@ declare module 'sirv' {
 		setHeaders?: (res: ServerResponse, pathname: string, stats: Stats) => void;
 	}
 
-	export default function (dir?: string, opts?: Options): RequestHandler;
+	function sirv(dir?: string, opts?: Options): RequestHandler;
 }
+
+export default sirv.sirv;

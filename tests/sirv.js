@@ -29,6 +29,10 @@ async function runMiddleware(fn, req) {
 
 	return out;
 }
+import { test } from 'uvu';
+import assert from 'uvu/assert';
+import { Writable } from 'stream';
+import sirv from '../packages/sirv';
 
 test('exports', () => {
 	assert.type(sirv, 'function');
