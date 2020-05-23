@@ -3,6 +3,7 @@
   "version": "1.0.0-next.5",
   "description": "A lightweight CLI program to serve static sites~!",
   "repository": "lukeed/sirv",
+  "main": "index.js",
   "license": "MIT",
   "files": [
     "*.js"
