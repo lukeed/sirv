@@ -116,7 +116,7 @@ module.exports = function (dir, opts={}) {
 	if (cc && opts.immutable) cc += ',immutable';
 
 	list(dir, (name, abs, stats) => {
-		if (opts.filter && !opts.filter(name, abs, stats)) return;
+		if (/\.well-known[\\+\/]/.test(name)) {} // keep
 		else if (!opts.dotfiles && /(^\.|[\\+|\/+]\.)/.test(name)) return;
 
 		let headers = toHeaders(name, stats, isEtag);
