@@ -3,9 +3,11 @@
   "version": "1.0.0-next.5",
   "description": "The optimized & lightweight middleware for serving requests to static assets",
   "repository": "lukeed/sirv",
+  "types": "index.d.ts",
   "license": "MIT",
   "files": [
-    "*.js"
+    "index.d.ts",
+    "index.js"
   ],
   "author": {
     "name": "Luke Edwards",
