@@ -1,7 +1,11 @@
 {
-  "lerna": "2.8.0",
   "version": "0.4.5",
-  "npmClient": "yarn",
+  "npmClient": "pnpm",
+  "command": {
+    "bootstrap": {
+      "npmClientArgs": ["--shamefully-hoist"]
+    }
+  },
   "packages": [
     "packages/*"
   ]
