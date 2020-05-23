@@ -1,6 +1,7 @@
-const test = require('tape');
-const sirv = require('../packages/sirv');
+const { test } = require('uvu');
+const assert = require('uvu/assert');
 const { Writable } = require('stream');
+const sirv = require('../packages/sirv');
 
 function runMiddleware(fn, req) {
 	const out = {
@@ -26,47 +27,34 @@ function runMiddleware(fn, req) {
 	}).then(() => out);
 }
 
-test('exports', t => {
-	t.is(typeof sirv, 'function', 'exports a function');
-	t.end();
+test('exports', () => {
+	assert.type(sirv, 'function');
 });
 
-test('prevents directory traversal attacks', t => {
-	const request = {
+test('prevents directory traversal attacks :: prod', () => {
+	const handler = sirv(__dirname, { dev: false });
+
+	const req = {
 		headers: {},
 		path: encodeURIComponent('../package.json'),
 	};
 
-	t.plan(1)
-	runMiddleware(
-		sirv(__dirname),
-		request
-	)
-	.then(response => {
-		t.is(response.statusCode, 404);
-		t.end();
-	})
-	.catch(err => {
-		t.fail(err.message)
+	runMiddleware(handler, req).then(res => {
+		assert.is(res.statusCode, 404);
 	});
 });
 
-test('prevents directory traversal attacks in dev mode', t => {
-	const request = {
+test('prevents directory traversal attacks :: dev', () => {
+	const handler = sirv(__dirname, { dev: true });
+
+	const req = {
 		headers: {},
 		path: encodeURIComponent('../package.json'),
 	};
 
-	t.plan(1)
-	runMiddleware(
-		sirv(__dirname, { dev: true }),
-		request
-	)
-	.then(response => {
-		t.is(response.statusCode, 404);
-		t.end();
-	})
-	.catch(err => {
-		t.fail(err.message)
+	runMiddleware(handler, req).then(res => {
+		assert.is(res.statusCode, 404);
 	});
 });
+
+test.run();
