@@ -3,12 +3,13 @@ const assert = require('uvu/assert');
 const { Writable } = require('stream');
 const sirv = require('../packages/sirv');
 
-function runMiddleware(fn, req) {
+async function runMiddleware(fn, req) {
 	const out = {
 		headers: {},
 		statusCode: -1,
 	}
-	return new Promise((resolve, reject) => {
+
+	await new Promise((resolve, reject) => {
 		const res = new Writable({
 			write() {}
 		});
@@ -24,37 +25,35 @@ function runMiddleware(fn, req) {
 			Object.assign(out.headers, headers);
 		}
 		fn(req, res);
-	}).then(() => out);
+	});
+
+	return out;
 }
 
 test('exports', () => {
 	assert.type(sirv, 'function');
 });
 
-test('prevents directory traversal attacks :: prod', () => {
+test('prevents directory traversal attacks :: prod', async () => {
 	const handler = sirv(__dirname, { dev: false });
 
-	const req = {
+	const res = await runMiddleware(handler, {
 		headers: {},
 		path: encodeURIComponent('../package.json'),
-	};
-
-	runMiddleware(handler, req).then(res => {
-		assert.is(res.statusCode, 404);
 	});
+
+	assert.is(res.statusCode, 404);
 });
 
-test('prevents directory traversal attacks :: dev', () => {
+test('prevents directory traversal attacks :: dev', async () => {
 	const handler = sirv(__dirname, { dev: true });
 
-	const req = {
+	const res = await runMiddleware(handler, {
 		headers: {},
 		path: encodeURIComponent('../package.json'),
-	};
-
-	runMiddleware(handler, req).then(res => {
-		assert.is(res.statusCode, 404);
 	});
+
+	assert.is(res.statusCode, 404);
 });
 
 test.run();
