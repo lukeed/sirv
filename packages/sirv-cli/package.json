@@ -8,7 +8,7 @@
     "*.js"
   ],
   "bin": {
-    "sirv": "index.js"
+    "sirv": "bin.js"
   },
   "author": {
     "name": "Luke Edwards",

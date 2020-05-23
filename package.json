@@ -7,9 +7,11 @@
   },
   "scripts": {
     "pretest": "lerna bootstrap",
+    "build": "lerna exec bundt index.js",
     "test": "uvu tests"
   },
   "devDependencies": {
+    "bundt": "1.0.1",
     "lerna": "3.21.0",
     "uvu": "^0.0.10"
   }
