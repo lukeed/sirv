@@ -2,12 +2,12 @@ const test = require('tape');
 const sirv = require('../packages/sirv');
 const { Writable } = require('stream');
 
-async function runMiddleware(fn, req) {
+function runMiddleware(fn, req) {
 	const out = {
 		headers: {},
 		statusCode: -1,
 	}
-	await new Promise((resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		const res = new Writable({
 			write() {}
 		});
@@ -23,9 +23,7 @@ async function runMiddleware(fn, req) {
 			Object.assign(out.headers, headers);
 		}
 		fn(req, res);
-	});
-
-	return out
+	}).then(() => out);
 }
 
 test('exports', t => {
