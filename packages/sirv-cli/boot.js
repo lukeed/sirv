@@ -77,10 +77,10 @@ module.exports = function (dir, opts) {
 	}
 
 	opts.port = PORT || opts.port;
-	toPort(opts.port).then(port => {
-		let hostname = HOST || opts.host || '0.0.0.0';
-		let https = opts.http2 || !!opts.ssl; // TODO
+	let hostname = HOST || opts.host || '0.0.0.0';
+	toPort({ host: hostname, port: opts.port }).then(port => {
 		let isOther = port != opts.port;
+		let https = opts.http2 || !!opts.ssl; // TODO
 		server.listen(port, hostname, err => {
 			if (err) throw err;
 			if (opts.quiet) return;

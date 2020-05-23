@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { join, resolve } = require('path');
+const { join, normalize, resolve } = require('path');
 const list = require('totalist/sync');
 const parser = require('@polka/url');
 const mime = require('mime/lite');
@@ -34,7 +34,8 @@ function viaLocal(uri, extns, dir, isEtag) {
 	let i=0, arr=toAssume(uri, extns);
 	let abs, stats, name, headers;
 	for (; i < arr.length; i++) {
-		if (fs.existsSync(abs = join(dir, name=arr[i]))) {
+		abs = normalize(join(dir, name=arr[i]));
+		if (abs.startsWith(dir) && fs.existsSync(abs)) {
 			stats = fs.statSync(abs);
 			if (stats.isDirectory()) continue;
 			headers = toHeaders(name, stats, isEtag);

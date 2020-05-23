@@ -1,7 +1,9 @@
-const test = require('tape');
+const { test } = require('uvu');
+const assert = require('uvu/assert');
 const boot = require('../packages/sirv-cli/boot');
 
-test('exports', t => {
-	t.is(typeof boot, 'function', 'exports a function');
-	t.end();
+test('exports', () => {
+	assert.type(boot, 'function');
 });
+
+test.run();

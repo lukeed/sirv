@@ -7,11 +7,10 @@
   },
   "scripts": {
     "pretest": "lerna bootstrap",
-    "test": "tape tests/*.js | tap-spec"
+    "test": "uvu tests"
   },
   "devDependencies": {
-    "lerna": "3.16.4",
-    "tap-spec": "5.0.0",
-    "tape": "4.11.0"
+    "lerna": "3.21.0",
+    "uvu": "^0.0.10"
   }
 }
