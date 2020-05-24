@@ -2,6 +2,7 @@ const fs = require('fs');
 const { join, normalize, resolve } = require('path');
 const parser = require('@polka/url');
 const mime = require('mime/lite');
+const http = require('http');
 
 const FILES = {};
 const noop = () => {};
@@ -69,6 +70,43 @@ function send(req, res, file, stats, headers={}) {
 	fs.createReadStream(file, opts).pipe(res);
 }
 
+function proxyMatch(url, opts) {
+	if (! url.startsWith(opts.prefix)) {
+		return undefined;
+	}
+	if (opts.prefix.endsWith('/')) {
+		return join(opts.path, url.substring(opts.prefix.length));
+	}
+	if (url.length === opts.prefix.length || url.charAt(opts.prefix.length) === '?') {
+		return url;
+	}
+	return undefined;
+}
+
+function proxy(req, res, opts) {
+	let url = proxyMatch(req.url, opts);
+	if (url === undefined) {
+		return false;
+	}
+	let options = {
+		hostname: opts.hostname,
+		port: opts.port,
+		path: url,
+		method: req.method,
+		headers: req.headers
+	};
+	let proxyReq = http.request(options, proxyRes => {
+		res.writeHead(proxyRes.statusCode, proxyRes.headers);
+		proxyRes.pipe(res);
+	});
+	proxyReq.on('error', _ => {
+		res.statusCode = 500;
+		res.end();
+	});
+	req.pipe(proxyReq);
+	return true;
+}
+
 module.exports = function (dir, opts={}) {
 	dir = resolve(dir || '.');
 
@@ -78,6 +116,9 @@ module.exports = function (dir, opts={}) {
 
 	if (opts.dev) {
 		return function (req, res, next) {
+			if (opts.proxy !== undefined && proxy(req, res, opts.proxy)) {
+				return;
+			}
 			let stats, file, uri=decodeURIComponent(req.path || req.pathname || parser(req).pathname);
 			let arr = [uri].concat(toAssume(uri, extensions)).map(x => normalize(join(dir, x))).filter(x => {
 				return x.startsWith(dir) && fs.existsSync(x);
@@ -118,6 +159,9 @@ module.exports = function (dir, opts={}) {
 	});
 
 	return function (req, res, next) {
+		if (opts.proxy !== undefined && proxy(req, res, opts.proxy)) {
+			return;
+		}
 		let pathname = decodeURIComponent(req.path || req.pathname || parser(req).pathname);
 		let data = FILES[pathname] || find(pathname, extensions);
 		if (!data) return next ? next() : isNotFound(req, res);
