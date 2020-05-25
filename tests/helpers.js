@@ -47,7 +47,8 @@ export async function lookup(filepath, enc) {
 	return CACHE[filepath] = {
 		data: filedata,
 		size: stats.size,
-		type: mime.getType(full) || ''
+		type: mime.getType(full) || '',
+		mtime: stats.mtime.getTime(),
 	};
 }
 

@@ -7,6 +7,7 @@ declare namespace sirv {
 
 	export interface Options {
 		dev?: boolean;
+		etag?: boolean;
 		maxAge?: number;
 		immutable?: boolean;
 		extensions?: string[];

@@ -380,3 +380,49 @@ dev('should not rely on file cached data', async () => {
 });
 
 dev.run();
+
+// ---
+
+const etag = suite('etag');
+
+etag('should include an "ETag" HTTP header value', async () => {
+	let server = utils.http({ etag: true });
+
+	try {
+		let res = await server.send('GET', '/bundle.67329.js');
+		await utils.matches(res, 200, 'bundle.67329.js', 'utf8');
+		assert.ok(res.headers['etag']);
+	} finally {
+		server.close();
+	}
+});
+
+etag('should be "weak" variant and calculated from file stats', async () => {
+	let server = utils.http({ etag: true });
+
+	try {
+		let res = await server.send('GET', '/bundle.67329.js');
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		assert.is(res.headers['etag'], `W/"${file.size}-${file.mtime}"`);
+	} finally {
+		server.close();
+	}
+});
+
+etag('should allow "If-None-Match" directive to function', async () => {
+	let server = utils.http({ etag: true });
+
+	try {
+		let res1 = await server.send('GET', '/bundle.67329.js');
+		assert.is(res1.statusCode, 200, 'normal request');
+
+		let headers = { 'If-None-Match': res1.headers['etag'] };
+		let res2 = await server.send('GET', '/bundle.67329.js', { headers });
+		assert.is(res2.statusCode, 304, 'send 304 for "no change" signal');
+		assert.is(res2.data, '', 'send empty response body');
+	} finally {
+		server.close();
+	}
+});
+
+etag.run();
