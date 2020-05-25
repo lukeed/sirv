@@ -426,3 +426,125 @@ etag('should allow "If-None-Match" directive to function', async () => {
 });
 
 etag.run();
+
+// ---
+
+const gzip = suite('gzip');
+
+gzip('should require "Accept-Encoding" match to do anything', async () => {
+	let server = utils.http({ gzip: true });
+	let headers = { 'Accept-Encoding': 'br,gzip' };
+
+	try {
+		await server.send('GET', '/data.js').catch(err => {
+			assert.is(err.statusCode, 404, 'does not find plain file');
+		});
+
+		// the `matches` helper assumes wrong mime type
+		let res = await server.send('GET', '/data.js', { headers });
+		assert.is(res.headers['content-type'], 'application/javascript');
+		assert.is(res.data, 'gzip js file\n');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+gzip('should serve prepared `.gz` file of any asset, if found', async () => {
+	let server = utils.http({ gzip: true });
+	let headers = { 'Accept-Encoding': 'br,gzip' };
+
+	try {
+		let res1 = await server.send('GET', '/', { headers });
+		assert.is(res1.headers['content-type'], 'text/html');
+		assert.is(res1.data, 'gzip html\n');
+		assert.is(res1.statusCode, 200);
+
+		let res2 = await server.send('GET', '/bundle.67329.js', { headers });
+		await utils.matches(res2, 200, 'bundle.67329.js', 'utf8'); // no gz
+	} finally {
+		server.close();
+	}
+});
+
+gzip('should defer to brotli when "Accept-Encoding" allows both', async () => {
+	let server = utils.http({ gzip: true, brotli: true });
+	let headers = { 'Accept-Encoding': 'br,gzip' };
+
+	try {
+		let res1 = await server.send('GET', '/', { headers });
+		assert.is(res1.headers['content-type'], 'text/html');
+		assert.is(res1.data, 'brotli html\n');
+		assert.is(res1.statusCode, 200);
+
+		let res2 = await server.send('GET', '/data.js', { headers });
+		assert.is(res2.headers['content-type'], 'application/javascript');
+		assert.is(res2.data, 'brotli js file\n');
+		assert.is(res2.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+gzip.run();
+
+// ---
+
+const brotli = suite('brotli');
+
+brotli('should require "Accept-Encoding" match to do anything', async () => {
+	let server = utils.http({ brotli: true });
+	let headers = { 'Accept-Encoding': 'br,gzip' };
+
+	try {
+		await server.send('GET', '/data.js').catch(err => {
+			assert.is(err.statusCode, 404, 'does not find plain file');
+		});
+
+		// the `matches` helper assumes wrong mime type
+		let res = await server.send('GET', '/data.js', { headers });
+		assert.is(res.headers['content-type'], 'application/javascript');
+		assert.is(res.data, 'brotli js file\n');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+brotli('should serve prepared `.gz` file of any asset, if found', async () => {
+	let server = utils.http({ brotli: true });
+	let headers = { 'Accept-Encoding': 'br,gzip' };
+
+	try {
+		let res1 = await server.send('GET', '/', { headers });
+		assert.is(res1.headers['content-type'], 'text/html');
+		assert.is(res1.data, 'brotli html\n');
+		assert.is(res1.statusCode, 200);
+
+		let res2 = await server.send('GET', '/bundle.67329.js', { headers });
+		await utils.matches(res2, 200, 'bundle.67329.js', 'utf8'); // no brotli
+	} finally {
+		server.close();
+	}
+});
+
+brotli('should be preferred when "Accept-Encoding" allows both', async () => {
+	let server = utils.http({ gzip: true, brotli: true });
+	let headers = { 'Accept-Encoding': 'br,gzip' };
+
+	try {
+		let res1 = await server.send('GET', '/', { headers });
+		assert.is(res1.headers['content-type'], 'text/html');
+		assert.is(res1.data, 'brotli html\n');
+		assert.is(res1.statusCode, 200);
+
+		let res2 = await server.send('GET', '/data.js', { headers });
+		assert.is(res2.headers['content-type'], 'application/javascript');
+		assert.is(res2.data, 'brotli js file\n');
+		assert.is(res2.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+brotli.run();

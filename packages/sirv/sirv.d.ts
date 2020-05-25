@@ -10,9 +10,11 @@ declare namespace sirv {
 		etag?: boolean;
 		maxAge?: number;
 		immutable?: boolean;
+		single?: string | boolean;
 		extensions?: string[];
 		dotfiles?: boolean;
-		single?: string | boolean;
+		brotli?: boolean;
+		gzip?: boolean;
 		onNoMatch?: (req: IncomingMessage, res: ServerResponse) => void;
 		setHeaders?: (res: ServerResponse, pathname: string, stats: Stats) => void;
 	}
