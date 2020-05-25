@@ -19,7 +19,7 @@ jobs:
         node-version: ${{ matrix.nodejs }}
 
     - name: (env) pnpm
-      run: npx pnpm add -g pnpm
+      run: curl -L https://raw.githubusercontent.com/pnpm/self-installer/master/install.js | node
 
     - name: Install
       run: |
