@@ -157,3 +157,80 @@ security('should prevent directory traversal attacks :: dev', async () => {
 });
 
 security.run();
+
+// ---
+
+const single = suite('single');
+
+single('should maintain "index.html" assumptions', async () => {
+	let server = utils.http({ single: true });
+
+	try {
+		let res1 = await server.send('GET', '/');
+		await utils.matches(res1, 200, 'index.html', 'utf8');
+
+		let res2 = await server.send('GET', '/about');
+		await utils.matches(res2, 200, 'about/index.htm', 'utf8');
+
+		let res3 = await server.send('GET', '/contact');
+		await utils.matches(res3, 200, 'contact/index.html', 'utf8');
+
+		let res4 = await server.send('GET', '/blog');
+		await utils.matches(res4, 200, 'blog.html', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+single('should serve assets when requested directly', async () => {
+	let server = utils.http({ single: true });
+
+	try {
+		let res1 = await server.send('GET', '/bundle.67329.js');
+		await utils.matches(res1, 200, 'bundle.67329.js', 'utf8');
+
+		let res2 = await server.send('GET', '/bundle.a5039.css');
+		await utils.matches(res2, 200, 'bundle.a5039.css', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+single('should serve root "index.html" for paths without assets', async () => {
+	let server = utils.http({ single: true });
+
+	try {
+		let res1 = await server.send('GET', '/foobar');
+		await utils.matches(res1, 200, 'index.html', 'utf8');
+
+		let res2 = await server.send('GET', '/foo/bar');
+		await utils.matches(res2, 200, 'index.html', 'utf8');
+
+		let res3 = await server.send('GET', '/about/foobar');
+		await utils.matches(res3, 200, 'index.html', 'utf8');
+
+		let res4 = await server.send('GET', '/bundle.foobar.js');
+		await utils.matches(res4, 200, 'index.html', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+single('should use custom fallback when `single` is a string', async () => {
+	let server = utils.http({ single: 'about/index.htm' });
+
+	try {
+		let res1 = await server.send('GET', '/foobar');
+		await utils.matches(res1, 200, 'about/index.htm', 'utf8');
+
+		let res2 = await server.send('GET', '/foo/bar');
+		await utils.matches(res2, 200, 'about/index.htm', 'utf8');
+
+		let res3 = await server.send('GET', '/about/foobar');
+		await utils.matches(res3, 200, 'about/index.htm', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+single.run();
