@@ -18,13 +18,16 @@ jobs:
       with:
         node-version: ${{ matrix.nodejs }}
 
+    - name: (env) pnpm
+      run: npx pnpm add -g pnpm
+
     - name: Install
       run: |
-        npm install
-        npm install -g nyc
+        pnpm install
+        pnpm add -g nyc
 
     - name: Test w/ Coverage
-      run: nyc --include=packages npm test
+      run: nyc --include=packages pnpm test
 
     - name: Report
       if: matrix.nodejs >= 12
