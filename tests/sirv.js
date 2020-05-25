@@ -128,7 +128,41 @@ index('should treat "/blog" as "/blog.html" request', async () => {
 
 index.run();
 
-// --
+// ---
+
+const extensions = suite('extensions');
+
+extensions('should limit which extensions are assumed for index lookup', async () => {
+	let server = utils.http({ extensions: ['html'] });
+
+	try {
+		await server.send('GET', '/about').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+	} finally {
+		server.close();
+	}
+});
+
+extensions('should extend which extensions are assumed for any request', async () => {
+	let server = utils.http({
+		extensions: ['js', 'css']
+	});
+
+	try {
+		let res1 = await server.send('GET', '/bundle.67329');
+		await utils.matches(res1, 200, 'bundle.67329.js', 'utf8');
+
+		let res2 = await server.send('GET', '/bundle.a5039');
+		await utils.matches(res2, 200, 'bundle.a5039.css', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+extensions.run();
+
+// ---
 
 const security = suite('security');
 
