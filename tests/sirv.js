@@ -268,3 +268,64 @@ single('should use custom fallback when `single` is a string', async () => {
 });
 
 single.run();
+
+// ---
+
+const dotfiles = suite('dotfiles');
+
+dotfiles('should reject hidden files (dotfiles) by default', async () => {
+	let server = utils.http();
+
+	try {
+		await server.send('GET', '/.hello').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		await server.send('GET', '/foo/.world').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+	} finally {
+		server.close();
+	}
+});
+
+dotfiles('should treat dotfiles with fallback during `single` mode', async () => {
+	let server = utils.http({ single: true });
+
+	try {
+		let res1 = await server.send('GET', '/.hello');
+		await utils.matches(res1, 200, 'index.html', 'utf8');
+
+		let res2 = await server.send('GET', '/foo/.world');
+		await utils.matches(res2, 200, 'index.html', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+dotfiles.only('should always allow access to ".well-known" directory contents', async () => {
+	let server = utils.http();
+
+	try {
+		let res = await server.send('GET', '/.well-known/example');
+		await utils.matches(res, 200, '.well-known/example', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+dotfiles('should allow requests to hidden files only when enabled', async () => {
+	let server = utils.http({ dotfiles: true });
+
+	try {
+		let res1 = await server.send('GET', '/.hello');
+		await utils.matches(res1, 200, '.hello', 'utf8');
+
+		let res2 = await server.send('GET', '/foo/.world');
+		await utils.matches(res2, 200, 'foo/.world', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+dotfiles.run();
