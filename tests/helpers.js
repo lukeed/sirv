@@ -12,6 +12,8 @@ const www = join(__dirname, 'public');
 
 const statfile = promisify(fs.stat);
 const readfile = promisify(fs.readFile);
+const writefile = promisify(fs.writeFile);
+const removefile = promisify(fs.unlink);
 
 export const setup = (opts={}) => sirv(www, opts);
 // export const http2 = opts => h2({}, setup(opts));
@@ -55,4 +57,14 @@ export async function matches(res, code, filepath, enc) {
 	assert.is(res.headers['content-type'], file.type);
 	assert.is(res.statusCode, code);
 	assert.is(res.data, file.data);
+}
+
+export async function write(file, data) {
+	let filename = join(www, file);
+	await writefile(filename, data);
+}
+
+export async function remove(file) {
+	let filename = join(www, file);
+	await removefile(filename);
 }

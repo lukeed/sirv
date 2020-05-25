@@ -329,3 +329,54 @@ dotfiles('should allow requests to hidden files only when enabled', async () => 
 });
 
 dotfiles.run();
+
+// ---
+
+const dev = suite('dev');
+
+dev('should not rely on initial Cache fill', async () => {
+	let server = utils.http({ dev: true });
+
+	try {
+		await server.send('GET', '/foo.bar.js').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		await utils.write('foo.bar.js', 'hello there');
+
+		// matches() helper will work but assert here
+		let res = await server.send('GET', '/foo.bar.js');
+		assert.is(res.headers['content-type'], 'application/javascript');
+		assert.is(res.headers['content-length'], '11');
+		assert.is(res.data, 'hello there');
+		assert.is(res.statusCode, 200);
+	} finally {
+		await utils.remove('foo.bar.js');
+		server.close();
+	}
+});
+
+dev('should not rely on file cached data', async () => {
+	let server = utils.http({ dev: true });
+
+	try {
+		await utils.write('foo.js', 'version 1');
+
+		// matches() helper will work but assert here
+		let res1 = await server.send('GET', '/foo.js');
+		assert.is(res1.data, 'version 1');
+		assert.is(res1.statusCode, 200);
+
+		await utils.write('foo.js', 'version 2');
+
+		// matches() helper will work but assert here
+		let res2 = await server.send('GET', '/foo.js');
+		assert.is(res2.data, 'version 2');
+		assert.is(res2.statusCode, 200);
+	} finally {
+		await utils.remove('foo.js');
+		server.close();
+	}
+});
+
+dev.run();
