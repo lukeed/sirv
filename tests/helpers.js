@@ -41,8 +41,7 @@ export async function spawn(...argv) {
 	for await (let buf of pid.stdout) {
 		let str = buf.toString();
 		if (/Local\:/.test(str)) {
-			address = new URL(str.match(/http:\/\/.*/)[0]);
-			console.log(str); // ONLY works if logged lol???
+			address = new URL(str.match(/https?:\/\/.*/)[0]);
 			break;
 		}
 	}
@@ -51,7 +50,7 @@ export async function spawn(...argv) {
 	return {
 		address,
 		close() {
-			pid.kill(0);
+			pid.kill('SIGTERM');
 		},
 		send(method, path, opts) {
 			let uri = new URL(path, address);
