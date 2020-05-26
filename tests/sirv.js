@@ -303,7 +303,7 @@ dotfiles('should treat dotfiles with fallback during `single` mode', async () =>
 	}
 });
 
-dotfiles.only('should always allow access to ".well-known" directory contents', async () => {
+dotfiles('should always allow access to ".well-known" directory contents', async () => {
 	let server = utils.http();
 
 	try {
