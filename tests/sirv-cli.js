@@ -61,8 +61,76 @@ basic('should start a server', async () => {
 		let res = await server.send('GET', '/');
 		await utils.matches(res, 200, 'index.html', 'utf8');
 	} finally {
-		server.close();
+		await server.close();
 	}
 });
 
 basic.run();
+
+// ---
+
+const cors = suite('cors');
+
+cors('should attach CORS headers to response', async () => {
+	let server = await utils.spawn('--cors');
+
+	try {
+		let res = await server.send('GET', '/blog');
+		await utils.matches(res, 200, 'blog.html', 'utf8');
+		assert.is(res.headers['access-control-allow-origin'], '*');
+		assert.is(res.headers['access-control-allow-headers'], 'Origin, Content-Type, Accept, Range');
+	} finally {
+		server.close();
+	}
+});
+
+cors.run();
+
+// ---
+
+const port = suite('port');
+
+port('should customize port via flag', async () => {
+	let server = await utils.spawn('--port', '8080');
+	try {
+		assert.is(server.address.hostname, 'localhost');
+		assert.is(server.address.port, '8080');
+	} finally {
+		server.close();
+	}
+});
+
+port.run();
+
+// ---
+
+const host = suite('host');
+
+host('should expose to network via empty host flag', async () => {
+	let server = await utils.spawn('--host');
+	try {
+		assert.is(server.address.hostname, '0.0.0.0');
+	} finally {
+		server.close();
+	}
+});
+
+host.run();
+
+// ---
+
+const http2 = suite('http2');
+
+http2('requires "key" path argument', async () => {
+	let pid = await utils.exec('--http2');
+	assert.ok(pid.stderr.toString().includes(`HTTP/2 requires "key" and "cert" values`));
+	assert.is(pid.status, 1);
+});
+
+http2('requires "cert" path argument', async () => {
+	let pid = await utils.exec('--http2', '--key', 'foo');
+	assert.ok(pid.stderr.toString().includes(`HTTP/2 requires "key" and "cert" values`));
+	assert.is(pid.status, 1);
+});
+
+http2.run();

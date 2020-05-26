@@ -36,16 +36,23 @@ export function exec(...argv) {
 
 export async function spawn(...argv) {
 	let address;
-	let pid = child.spawn('node', [BIN, www, ...argv]);
+	let pid = child.execFile('node', [BIN, www, ...argv]);
 
 	for await (let buf of pid.stdout) {
-		let match = buf.toString().match(/localhost:(\d+)/);
-		if (match) address = new URL(`http://localhost:${match[1]}`);
-		if (address) break;
+		let str = buf.toString();
+		if (/Local\:/.test(str)) {
+			address = new URL(str.match(/http:\/\/.*/)[0]);
+			console.log(str); // ONLY works if logged lol???
+			break;
+		}
 	}
 
+
 	return {
-		close: pid.kill.bind(pid),
+		address,
+		close() {
+			pid.kill(0);
+		},
 		send(method, path, opts) {
 			let uri = new URL(path, address);
 			return send(method, uri, opts);
