@@ -4,10 +4,12 @@ import mime from 'mime/lite';
 import { send } from 'httpie';
 import { promisify } from 'util';
 import { createServer } from 'http';
+import * as child from 'child_process';
 import * as assert from 'uvu/assert';
 import sirv from '../packages/sirv';
 
 const www = join(__dirname, 'public');
+const BIN = require.resolve('../packages/sirv-cli/bin.js');
 
 const statfile = promisify(fs.stat);
 const readfile = promisify(fs.readFile);
@@ -21,6 +23,29 @@ export function http(opts) {
 	let address = new URL(listen(server));
 	return {
 		close: server.close.bind(server),
+		send(method, path, opts) {
+			let uri = new URL(path, address);
+			return send(method, uri, opts);
+		}
+	};
+}
+
+export function exec(...argv) {
+	return child.spawnSync('node', [BIN, www, ...argv]);
+}
+
+export async function spawn(...argv) {
+	let address;
+	let pid = child.spawn('node', [BIN, www, ...argv]);
+
+	for await (let buf of pid.stdout) {
+		let match = buf.toString().match(/localhost:(\d+)/);
+		if (match) address = new URL(`http://localhost:${match[1]}`);
+		if (address) break;
+	}
+
+	return {
+		close: pid.kill.bind(pid),
 		send(method, path, opts) {
 			let uri = new URL(path, address);
 			return send(method, uri, opts);
