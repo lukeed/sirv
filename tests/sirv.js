@@ -1,6 +1,6 @@
 import { suite } from 'uvu';
 import assert from 'uvu/assert';
-import sirv from '../packages/sirv';
+import sirv from '../packages/sirv/index';
 import * as utils from './helpers';
 
 const types = suite('types');

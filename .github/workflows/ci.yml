@@ -26,6 +26,9 @@ jobs:
         pnpm install
         pnpm add -g nyc
 
+    - name: Build
+      run: pnpm run build
+
     - name: Test w/ Coverage
       run: nyc --include=packages pnpm test
 
