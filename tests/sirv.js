@@ -626,3 +626,126 @@ immutable('should not do anything without a `maxAge` option enabled', async () =
 });
 
 immutable.run();
+
+// ---
+
+const ranges = suite('ranges');
+
+ranges('should send the requested "Range" slice :: start', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=0-10' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+
+		assert.is(res.statusCode, 206);
+		assert.is(res.headers['content-length'], '11');
+		assert.is(res.headers['accept-ranges'], 'bytes');
+		assert.is(res.headers['content-range'], `bytes 0-10/${file.size}`);
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should send the requested "Range" slice :: middle', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=6-96' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+
+		assert.is(res.statusCode, 206);
+		assert.is(res.headers['content-length'], '91');
+		assert.is(res.headers['accept-ranges'], 'bytes');
+		assert.is(res.headers['content-range'], `bytes 6-96/${file.size}`);
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should send the requested "Range" slice :: end', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=80-115' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+
+		assert.is(res.statusCode, 206);
+		assert.is(res.headers['content-length'], '36');
+		assert.is(res.headers['accept-ranges'], 'bytes');
+		assert.is(res.headers['content-range'], `bytes 80-115/${file.size}`);
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should send the requested "Range" slice :: full', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=0-115' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+
+		assert.is(res.statusCode, 206);
+		assert.is(res.headers['content-length'], '116');
+		assert.is(res.headers['accept-ranges'], 'bytes');
+		assert.is(res.headers['content-range'], `bytes 0-115/${file.size}`);
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should assume the end-value is final byte when not included', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=2' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+
+		assert.is(res.statusCode, 206);
+		assert.is(res.headers['content-length'], '114');
+		assert.is(res.headers['accept-ranges'], 'bytes');
+		assert.is(res.headers['content-range'], `bytes 2-115/${file.size}`);
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should assume the end-value is final byte when not included :: full', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=0' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+
+		assert.is(res.statusCode, 206);
+		assert.is(res.headers['content-length'], '116');
+		assert.is(res.headers['accept-ranges'], 'bytes');
+		assert.is(res.headers['content-range'], `bytes 0-115/${file.size}`);
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should throw `416` when range cannot be met (overflow)', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=0-123456' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		await server.send('GET', '/bundle.67329.js', { headers }).catch(err => {
+			assert.is(err.headers['content-range'], `bytes */${file.size}`);
+			assert.is(err.statusCode, 416);
+		});
+	} finally {
+		server.close();
+	}
+});
+
+ranges.run();
