@@ -429,67 +429,6 @@ etag.run();
 
 // ---
 
-const gzip = suite('gzip');
-
-gzip('should require "Accept-Encoding" match to do anything', async () => {
-	let server = utils.http({ gzip: true });
-	let headers = { 'Accept-Encoding': 'br,gzip' };
-
-	try {
-		await server.send('GET', '/data.js').catch(err => {
-			assert.is(err.statusCode, 404, 'does not find plain file');
-		});
-
-		// the `matches` helper assumes wrong mime type
-		let res = await server.send('GET', '/data.js', { headers });
-		assert.is(res.headers['content-type'], 'application/javascript');
-		assert.is(res.data, 'gzip js file\n');
-		assert.is(res.statusCode, 200);
-	} finally {
-		server.close();
-	}
-});
-
-gzip('should serve prepared `.gz` file of any asset, if found', async () => {
-	let server = utils.http({ gzip: true });
-	let headers = { 'Accept-Encoding': 'br,gzip' };
-
-	try {
-		let res1 = await server.send('GET', '/', { headers });
-		assert.is(res1.headers['content-type'], 'text/html');
-		assert.is(res1.data, 'gzip html\n');
-		assert.is(res1.statusCode, 200);
-
-		let res2 = await server.send('GET', '/bundle.67329.js', { headers });
-		await utils.matches(res2, 200, 'bundle.67329.js', 'utf8'); // no gz
-	} finally {
-		server.close();
-	}
-});
-
-gzip('should defer to brotli when "Accept-Encoding" allows both', async () => {
-	let server = utils.http({ gzip: true, brotli: true });
-	let headers = { 'Accept-Encoding': 'br,gzip' };
-
-	try {
-		let res1 = await server.send('GET', '/', { headers });
-		assert.is(res1.headers['content-type'], 'text/html');
-		assert.is(res1.data, 'brotli html\n');
-		assert.is(res1.statusCode, 200);
-
-		let res2 = await server.send('GET', '/data.js', { headers });
-		assert.is(res2.headers['content-type'], 'application/javascript');
-		assert.is(res2.data, 'brotli js file\n');
-		assert.is(res2.statusCode, 200);
-	} finally {
-		server.close();
-	}
-});
-
-gzip.run();
-
-// ---
-
 const brotli = suite('brotli');
 
 brotli('should require "Accept-Encoding" match to do anything', async () => {
@@ -548,6 +487,67 @@ brotli('should be preferred when "Accept-Encoding" allows both', async () => {
 });
 
 brotli.run();
+
+// ---
+
+const gzip = suite('gzip');
+
+gzip('should require "Accept-Encoding" match to do anything', async () => {
+	let server = utils.http({ gzip: true });
+	let headers = { 'Accept-Encoding': 'br,gzip' };
+
+	try {
+		await server.send('GET', '/data.js').catch(err => {
+			assert.is(err.statusCode, 404, 'does not find plain file');
+		});
+
+		// the `matches` helper assumes wrong mime type
+		let res = await server.send('GET', '/data.js', { headers });
+		assert.is(res.headers['content-type'], 'application/javascript');
+		assert.is(res.data, 'gzip js file\n');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+gzip('should serve prepared `.gz` file of any asset, if found', async () => {
+	let server = utils.http({ gzip: true });
+	let headers = { 'Accept-Encoding': 'br,gzip' };
+
+	try {
+		let res1 = await server.send('GET', '/', { headers });
+		assert.is(res1.headers['content-type'], 'text/html');
+		assert.is(res1.data, 'gzip html\n');
+		assert.is(res1.statusCode, 200);
+
+		let res2 = await server.send('GET', '/bundle.67329.js', { headers });
+		await utils.matches(res2, 200, 'bundle.67329.js', 'utf8'); // no gz
+	} finally {
+		server.close();
+	}
+});
+
+gzip('should defer to brotli when "Accept-Encoding" allows both', async () => {
+	let server = utils.http({ gzip: true, brotli: true });
+	let headers = { 'Accept-Encoding': 'br,gzip' };
+
+	try {
+		let res1 = await server.send('GET', '/', { headers });
+		assert.is(res1.headers['content-type'], 'text/html');
+		assert.is(res1.data, 'brotli html\n');
+		assert.is(res1.statusCode, 200);
+
+		let res2 = await server.send('GET', '/data.js', { headers });
+		assert.is(res2.headers['content-type'], 'application/javascript');
+		assert.is(res2.data, 'brotli js file\n');
+		assert.is(res2.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+gzip.run();
 
 // ---
 
@@ -749,3 +749,101 @@ ranges('should throw `416` when range cannot be met (overflow)', async () => {
 });
 
 ranges.run();
+
+// ---
+
+const setHeaders = suite('setHeaders');
+
+setHeaders('should be able to set new response headers', async () => {
+	let server = utils.http({
+		setHeaders(res) {
+			res.setHeader('x-foo', 'bar');
+		}
+	});
+
+	try {
+		let res = await server.send('GET', '/sw.js');
+		assert.is(res.headers['x-foo'], 'bar');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+setHeaders('should be able to customize "Content-Type" header', async () => {
+	let server = utils.http({
+		setHeaders(res) {
+			res.setHeader('Content-Type', 'text/foobar');
+		}
+	});
+
+	try {
+		let res = await server.send('GET', '/sw.js');
+		assert.is(res.headers['content-type'], 'text/foobar');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+setHeaders('should receive "path" argument', async () => {
+	let server = utils.http({
+		setHeaders(res, path) {
+			res.setHeader('Cache-Control', path === '/sw.js' ? 'private' : 'public');
+		}
+	});
+
+	try {
+		let res1 = await server.send('GET', '/sw.js');
+		assert.is(res1.headers['cache-control'], 'private');
+		await utils.matches(res1, 200, 'sw.js', 'utf8');
+
+		let res2 = await server.send('GET', '/test.svg');
+		assert.is(res2.headers['cache-control'], 'public');
+		await utils.matches(res2, 200, 'test.svg', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+setHeaders('should receive "stats" argument', async () => {
+	let server = utils.http({
+		setHeaders(res, path, stats) {
+			res.setHeader('x-filesize', stats.size);
+		}
+	});
+
+	try {
+		let res = await server.send('GET', '/sw.js');
+		let file = await utils.lookup('sw.js', 'utf8');
+		assert.is(res.headers['x-filesize'], String(file.size));
+	} finally {
+		server.close();
+	}
+});
+
+setHeaders.run();
+
+// ---
+
+const onNoMatch = suite('onNoMatch');
+
+onNoMatch('should be called instead of default 404 response', async () => {
+	let server = utils.http({
+		onNoMatch(req, res) {
+			res.setHeader('x-foo', 'bar');
+			res.end('not found');
+		}
+	});
+
+	try {
+		let res = await server.send('GET', '/1234');
+		assert.is(res.headers['x-foo'], 'bar');
+		assert.is(res.data, 'not found');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+onNoMatch.run();
