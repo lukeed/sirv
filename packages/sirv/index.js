@@ -122,7 +122,7 @@ export default function (dir, opts={}) {
 		let headers = toHeaders(name, stats, isEtag);
 		if (cc) headers['Cache-Control'] = cc;
 
-		FILES['/' + name.replace(/\\+/g, '/')] = { abs, stats, headers };
+		FILES['/' + name.normalize().replace(/\\+/g, '/')] = { abs, stats, headers };
 	});
 
 	return function (req, res, next) {

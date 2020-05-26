@@ -69,6 +69,64 @@ basic.run();
 
 // ---
 
+const encode = suite('URI encoding');
+
+encode('should work when the request path contains accented characters :: dev', async () => {
+	let server = utils.http({ dev: true });
+
+	try {
+		let res = await server.send('GET', '/fünke.txt');
+		assert.is(res.headers['content-type'], 'text/plain');
+		assert.is(res.data, 'fünke.txt\n');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+encode('should work when the request path contains encoded characters :: dev', async () => {
+	let server = utils.http({ dev: true });
+
+	try {
+		let res = await server.send('GET', '/f%C3%BCnke.txt');
+		assert.is(res.headers['content-type'], 'text/plain');
+		assert.is(res.data, 'fünke.txt\n');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+encode('should work when the request path contains accented characters :: prod', async () => {
+	let server = utils.http({ dev: false });
+
+	try {
+		let res = await server.send('GET', '/fünke.txt');
+		assert.is(res.headers['content-type'], 'text/plain');
+		assert.is(res.data, 'fünke.txt\n');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+encode('should work when the request path contains encoded characters :: prod', async () => {
+	let server = utils.http({ dev: false });
+
+	try {
+		let res = await server.send('GET', '/f%C3%BCnke.txt');
+		assert.is(res.headers['content-type'], 'text/plain');
+		assert.is(res.data, 'fünke.txt\n');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+encode.run();
+
+// ---
+
 const index = suite('index.html');
 
 index('should handle direct "index.html" requests', async () => {
