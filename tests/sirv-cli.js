@@ -1,5 +1,6 @@
 import { suite } from 'uvu';
 import assert from 'uvu/assert';
+import selfsigned from 'selfsigned';
 import * as utils from './helpers';
 
 const help = suite('help');
@@ -131,6 +132,20 @@ http2('requires "cert" path argument', async () => {
 	let pid = await utils.exec('--http2', '--key', 'foo');
 	assert.ok(pid.stderr.toString().includes(`HTTP/2 requires "key" and "cert" values`));
 	assert.is(pid.status, 1);
+});
+
+http2('should start a HTTP/2 server with valid args', async () => {
+	let pems = selfsigned.generate();
+	let key = await utils.write('foobar.key', pems.private);
+	let cert = await utils.write('foobar.cert', pems.cert);
+
+	let server = await utils.spawn('--http2', '--key', key, '--cert', cert);
+
+	try {
+		assert.is(server.address.protocol, 'https:');
+	} finally {
+		server.close();
+	}
 });
 
 http2.run();

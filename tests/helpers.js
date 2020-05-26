@@ -46,7 +46,6 @@ export async function spawn(...argv) {
 		}
 	}
 
-
 	return {
 		address,
 		close() {
@@ -92,6 +91,7 @@ export async function matches(res, code, filepath, enc) {
 export async function write(file, data) {
 	let filename = join(www, file);
 	await writefile(filename, data);
+	return filename;
 }
 
 export async function remove(file) {
