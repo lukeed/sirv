@@ -42,6 +42,7 @@ export async function spawn(...argv) {
 		let str = buf.toString();
 		if (/Local\:/.test(str)) {
 			address = new URL(str.match(/https?:\/\/.*/)[0]);
+			console.log(str); // WTF why have to log to pass???
 			break;
 		}
 	}
