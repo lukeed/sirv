@@ -3,9 +3,8 @@ import { join } from 'path';
 import mime from 'mime/lite';
 import { send } from 'httpie';
 import { promisify } from 'util';
+import { createServer } from 'http';
 import * as assert from 'uvu/assert';
-// import { createServer as h2 } from 'http2';
-import { createServer as h1 } from 'http';
 import sirv from '../packages/sirv';
 
 const www = join(__dirname, 'public');
@@ -16,10 +15,9 @@ const writefile = promisify(fs.writeFile);
 const removefile = promisify(fs.unlink);
 
 export const setup = (opts={}) => sirv(www, opts);
-// export const http2 = opts => h2({}, setup(opts));
 
 export function http(opts) {
-	let server = h1(setup(opts));
+	let server = createServer(setup(opts));
 	let address = new URL(listen(server));
 	return {
 		close: server.close.bind(server),
