@@ -548,3 +548,81 @@ brotli('should be preferred when "Accept-Encoding" allows both', async () => {
 });
 
 brotli.run();
+
+// ---
+
+const maxAge = suite('maxAge');
+
+maxAge('should set the "Cache-Control" HTTP header value', async () => {
+	let server = utils.http({ maxAge: 100 });
+
+	try {
+		let res = await server.send('GET', '/bundle.67329.js');
+		assert.is(res.headers['cache-control'], 'public,max-age=100');
+	} finally {
+		server.close();
+	}
+});
+
+maxAge('should accept `0` value', async () => {
+	let server = utils.http({ maxAge: 0 });
+
+	try {
+		let res = await server.send('GET', '/bundle.67329.js');
+		assert.is(res.headers['cache-control'], 'public,max-age=0');
+	} finally {
+		server.close();
+	}
+});
+
+maxAge('should ignore `null` value', async () => {
+	let server = utils.http({ maxAge: null });
+
+	try {
+		let res = await server.send('GET', '/bundle.67329.js');
+		assert.not(res.headers['cache-control']);
+	} finally {
+		server.close();
+	}
+});
+
+maxAge.run();
+
+// ---
+
+const immutable = suite('immutable');
+
+immutable('should append the `immutable` directive to "Cache-Control" header value', async () => {
+	let server = utils.http({ maxAge: 1234, immutable: true });
+
+	try {
+		let res = await server.send('GET', '/bundle.67329.js');
+		assert.is(res.headers['cache-control'], 'public,max-age=1234,immutable');
+	} finally {
+		server.close();
+	}
+});
+
+immutable('should work with `maxAge=0` value', async () => {
+	let server = utils.http({ maxAge: 0, immutable: true });
+
+	try {
+		let res = await server.send('GET', '/bundle.67329.js');
+		assert.is(res.headers['cache-control'], 'public,max-age=0,immutable');
+	} finally {
+		server.close();
+	}
+});
+
+immutable('should not do anything without a `maxAge` option enabled', async () => {
+	let server = utils.http({ immutable: true });
+
+	try {
+		let res = await server.send('GET', '/bundle.67329.js');
+		assert.not(res.headers['cache-control']);
+	} finally {
+		server.close();
+	}
+});
+
+immutable.run();
