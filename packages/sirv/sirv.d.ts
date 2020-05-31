@@ -2,6 +2,7 @@ declare namespace sirv {
 	import type { Stats } from 'fs';
 	import type { IncomingMessage, ServerResponse } from 'http';
 
+	type Arrayable<T> = T | T[];
 	export type NextHandler = VoidFunction | Promise<void>;
 	export type RequestHandler = (req: IncomingMessage, res: ServerResponse, next?: NextHandler) => void;
 
@@ -11,6 +12,7 @@ declare namespace sirv {
 		maxAge?: number;
 		immutable?: boolean;
 		single?: string | boolean;
+		assets?: false | Arrayable<string | RegExp>;
 		extensions?: string[];
 		dotfiles?: boolean;
 		brotli?: boolean;

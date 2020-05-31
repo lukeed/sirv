@@ -45,6 +45,13 @@ function viaLocal(uri, extns, dir, isEtag) {
 	}
 }
 
+function isOkay(arr, uri) {
+	for (let i=0; i < arr.length; i++) {
+		if (arr[i].test(uri)) return false;
+	}
+	return true;
+}
+
 function is404(req, res) {
 	return (res.statusCode=404,res.end());
 }
@@ -112,6 +119,14 @@ export default function (dir, opts={}) {
 		fallback += !!~idx ? opts.single.substring(0, idx) : opts.single;
 	}
 
+	let ignores = [];
+	if (isSPA && opts.assets !== false) {
+		ignores.push(/\w\.\w$/); // any extn
+		[].concat(opts.assets || []).forEach(x => {
+			ignores.push(new RegExp(x, 'i')); // noop for RegExp
+		});
+	}
+
 	let cc = opts.maxAge != null && `public,max-age=${opts.maxAge}`;
 	if (cc && opts.immutable) cc += ',immutable';
 
@@ -134,7 +149,7 @@ export default function (dir, opts={}) {
 
 		let fn = opts.dev ? viaLocal : viaCache;
 		let pathname = req.path || parser(req, true).pathname;
-		let data = fn(pathname, extns, dir, isEtag) || isSPA && fn(fallback, extns, dir, isEtag);
+		let data = fn(pathname, extns, dir, isEtag) || isSPA && isOkay(ignores, pathname) && fn(fallback, extns, dir, isEtag);
 		if (!data) return next ? next() : isNotFound(req, res);
 
 		if (isEtag && req.headers['if-none-match'] === data.headers['ETag']) {
