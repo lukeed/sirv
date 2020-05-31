@@ -325,7 +325,163 @@ single('should use custom fallback when `single` is a string', async () => {
 	}
 });
 
+single('should NOT fallback to "index.html" for URLs with extension', async () => {
+	let server = utils.http({ single: true });
+
+	try {
+		await server.send('GET', '/404.css').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		await server.send('GET', '/404.js').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		await server.send('GET', '/foo/bar/baz.bat').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+	} finally {
+		server.close();
+	}
+});
+
 single.run();
+
+// ---
+
+const assets = suite('assets');
+
+assets('should be able to fallback any URL to "index.html" when desired', async () => {
+	let server = utils.http({ single:true, assets:false });
+
+	try {
+		let res1 = await server.send('GET', '/404.css');
+		await utils.matches(res1, 200, 'index.html', 'utf8');
+
+		let res2 = await server.send('GET', '/404.js');
+		await utils.matches(res2, 200, 'index.html', 'utf8');
+
+		let res3 = await server.send('GET', '/foo/bar/baz.bat');
+		await utils.matches(res3, 200, 'index.html', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+assets('should be able to fallback any URL to "index.html" when desired', async () => {
+	let server = utils.http({ single:true, assets:false });
+
+	try {
+		let res1 = await server.send('GET', '/404.css');
+		await utils.matches(res1, 200, 'index.html', 'utf8');
+
+		let res2 = await server.send('GET', '/404.js');
+		await utils.matches(res2, 200, 'index.html', 'utf8');
+
+		let res3 = await server.send('GET', '/foo/bar/baz.bat');
+		await utils.matches(res3, 200, 'index.html', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+assets('should provide custom RegExp pattern to ignore', async () => {
+	let server = utils.http({
+		single: true,
+		assets: /^[/]foo/
+	});
+
+	try {
+		await server.send('GET', '/foo/404').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		await server.send('GET', '/foobar/baz').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		await server.send('GET', '/foo/bar/baz').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		let res = await server.send('GET', '/hello/world');
+		await utils.matches(res, 200, 'index.html', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+assets('should provide custom String pattern to ignore', async () => {
+	let server = utils.http({
+		single: true,
+		assets: '^/foo'
+	});
+
+	try {
+		await server.send('GET', '/foo/404').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		await server.send('GET', '/foobar/baz').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		await server.send('GET', '/foo/bar/baz').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		let res = await server.send('GET', '/hello/world');
+		await utils.matches(res, 200, 'index.html', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+assets('should provide mulitple RegExp patterns to ignore', async () => {
+	let server = utils.http({
+		single: true,
+		assets: [/^[/]foo/, /bar/]
+	});
+
+	try {
+		await server.send('GET', '/foo/404').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		await server.send('GET', '/hello/bar/baz').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		let res = await server.send('GET', '/hello/world');
+		await utils.matches(res, 200, 'index.html', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+assets('should provide mulitple String patterns to ignore', async () => {
+	let server = utils.http({
+		single: true,
+		assets: ['^/foo', 'bar']
+	});
+
+	try {
+		await server.send('GET', '/foo/404').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		await server.send('GET', '/hello/bar/baz').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		let res = await server.send('GET', '/hello/world');
+		await utils.matches(res, 200, 'index.html', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
+assets.run();
 
 // ---
 
