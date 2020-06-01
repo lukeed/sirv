@@ -27,14 +27,14 @@ function toAssume(uri, extns, toIgnore) {
 	return arr;
 }
 
-function viaCache(uri, extns, ignores) {
+function viaCache(ignores, uri, extns) {
 	let i=0, data, arr=toAssume(uri, extns, ignores);
 	for (; i < arr.length; i++) {
 		if (data = FILES[arr[i]]) return data;
 	}
 }
 
-function viaLocal(uri, extns, ignores, dir, isEtag) {
+function viaLocal(ignores, dir, isEtag, uri, extns) {
 	let i=0, arr=toAssume(uri, extns, ignores);
 	let abs, stats, name, headers;
 	for (; i < arr.length; i++) {
@@ -121,8 +121,8 @@ export default function (dir, opts={}) {
 		ignores.push(/\w\.\w$/); // any extn
 		if (opts.dotfiles) ignores.push(/\/\.\w/);
 		else ignores.push(/\/\.well-known/);
-	[].concat(opts.ignores || []).forEach(x => {
-		ignores.push(new RegExp(x, 'i'));
+		[].concat(opts.ignores || []).forEach(x => {
+			ignores.push(new RegExp(x, 'i'));
 		});
 	}
 
@@ -139,6 +139,8 @@ export default function (dir, opts={}) {
 		FILES['/' + name.normalize().replace(/\\+/g, '/')] = { abs, stats, headers };
 	});
 
+	let lookup = opts.dev ? viaLocal.bind(0, ignores, dir, isEtag) : viaCache.bind(0, ignores);
+
 	return function (req, res, next) {
 		let extns = [];
 		let val = req.headers['accept-encoding'] || '';
@@ -146,9 +148,8 @@ export default function (dir, opts={}) {
 		if (brots && /(br|brotli)/i.test(val)) extns=brots.concat(extns);
 		extns = extns.concat('', extensions); // [...br, ...gz, orig, ...exts]
 
-		let fn = opts.dev ? viaLocal : viaCache;
 		let pathname = req.path || parser(req, true).pathname;
-		let data = fn(pathname, extns, ignores, dir, isEtag) || isSPA && fn(fallback, extns, ignores, dir, isEtag);
+		let data = lookup(pathname, extns) || isSPA && lookup(fallback, extns);
 		if (!data) return next ? next() : isNotFound(req, res);
 
 		if (isEtag && req.headers['if-none-match'] === data.headers['ETag']) {
