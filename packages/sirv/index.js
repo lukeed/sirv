@@ -7,14 +7,18 @@ import mime from 'mime/lite';
 const FILES = {};
 const noop = () => {};
 
-function toAssume(uri, extns) {
+function toAssume(uri, extns, toIgnore) {
 	let i=0, x, len=uri.length - 1;
 	if (uri.charCodeAt(len) === 47) {
 		uri = uri.substring(0, len);
 	}
 
+	for (; i < toIgnore.length; i++) {
+		if (toIgnore[i].test(uri)) return [uri];
+	}
+
 	let arr=[], tmp=`${uri}/index`;
-	for (; i < extns.length; i++) {
+	for (i=0; i < extns.length; i++) {
 		x = extns[i] ? `.${extns[i]}` : '';
 		if (uri) arr.push(uri + x);
 		arr.push(tmp + x);
@@ -23,15 +27,15 @@ function toAssume(uri, extns) {
 	return arr;
 }
 
-function viaCache(uri, extns) {
-	let i=0, data, arr=toAssume(uri, extns);
+function viaCache(uri, extns, ignores) {
+	let i=0, data, arr=toAssume(uri, extns, ignores);
 	for (; i < arr.length; i++) {
 		if (data = FILES[arr[i]]) return data;
 	}
 }
 
-function viaLocal(uri, extns, dir, isEtag) {
-	let i=0, arr=toAssume(uri, extns);
+function viaLocal(uri, extns, ignores, dir, isEtag) {
+	let i=0, arr=toAssume(uri, extns, ignores);
 	let abs, stats, name, headers;
 	for (; i < arr.length; i++) {
 		abs = normalize(join(dir, name=arr[i]));
@@ -43,13 +47,6 @@ function viaLocal(uri, extns, dir, isEtag) {
 			return { abs, stats, headers };
 		}
 	}
-}
-
-function isOkay(arr, uri) {
-	for (let i=0; i < arr.length; i++) {
-		if (arr[i].test(uri)) return false;
-	}
-	return true;
 }
 
 function is404(req, res) {
@@ -151,7 +148,7 @@ export default function (dir, opts={}) {
 
 		let fn = opts.dev ? viaLocal : viaCache;
 		let pathname = req.path || parser(req, true).pathname;
-		let data = fn(pathname, extns, dir, isEtag) || isSPA && isOkay(ignores, pathname) && fn(fallback, extns, dir, isEtag);
+		let data = fn(pathname, extns, ignores, dir, isEtag) || isSPA && fn(fallback, extns, ignores, dir, isEtag);
 		if (!data) return next ? next() : isNotFound(req, res);
 
 		if (isEtag && req.headers['if-none-match'] === data.headers['ETag']) {
