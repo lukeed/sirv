@@ -120,11 +120,14 @@ export default function (dir, opts={}) {
 	}
 
 	let ignores = [];
-	if (opts.ignores === false) {}
-	else if (isSPA) ignores.push(/\w\.\w$/); // any extn
+	if (opts.ignores !== false) {
+		ignores.push(/\w\.\w$/); // any extn
+		if (opts.dotfiles) ignores.push(/\/\.\w/);
+		else ignores.push(/\/\.well-known/);
 	[].concat(opts.ignores || []).forEach(x => {
 		ignores.push(new RegExp(x, 'i'));
 		});
+	}
 
 	let cc = opts.maxAge != null && `public,max-age=${opts.maxAge}`;
 	if (cc && opts.immutable) cc += ',immutable';
