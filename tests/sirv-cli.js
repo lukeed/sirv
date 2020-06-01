@@ -32,7 +32,7 @@ help('--help', () => {
         -K, --key          Path to certificate key for HTTP/2 server
         -P, --pass         Passphrase to decrypt a certificate key
         -s, --single       Serve as single-page application with "index.html" fallback
-        -a, --assets       URL pattern(s) for the single-page application assets
+        -I, --ignores      Any URL pattern(s) to ignore "index.html" assumptions
         -q, --quiet        Disable logging to terminal
         -H, --host         Hostname to bind  (default localhost)
         -p, --port         Port to bind  (default 5000)

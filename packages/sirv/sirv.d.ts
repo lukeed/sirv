@@ -12,7 +12,7 @@ declare namespace sirv {
 		maxAge?: number;
 		immutable?: boolean;
 		single?: string | boolean;
-		assets?: false | Arrayable<string | RegExp>;
+		ignores?: false | Arrayable<string | RegExp>;
 		extensions?: string[];
 		dotfiles?: boolean;
 		brotli?: boolean;

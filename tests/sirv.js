@@ -349,27 +349,10 @@ single.run();
 
 // ---
 
-const assets = suite('assets');
+const ignores = suite('ignores');
 
-assets('should be able to fallback any URL to "index.html" when desired', async () => {
-	let server = utils.http({ single:true, assets:false });
-
-	try {
-		let res1 = await server.send('GET', '/404.css');
-		await utils.matches(res1, 200, 'index.html', 'utf8');
-
-		let res2 = await server.send('GET', '/404.js');
-		await utils.matches(res2, 200, 'index.html', 'utf8');
-
-		let res3 = await server.send('GET', '/foo/bar/baz.bat');
-		await utils.matches(res3, 200, 'index.html', 'utf8');
-	} finally {
-		server.close();
-	}
-});
-
-assets('should be able to fallback any URL to "index.html" when desired', async () => {
-	let server = utils.http({ single:true, assets:false });
+ignores('should be able to fallback any URL to "index.html" when desired', async () => {
+	let server = utils.http({ single:true, ignores:false });
 
 	try {
 		let res1 = await server.send('GET', '/404.css');
@@ -385,10 +368,10 @@ assets('should be able to fallback any URL to "index.html" when desired', async 
 	}
 });
 
-assets('should provide custom RegExp pattern to ignore', async () => {
+ignores('should provide custom RegExp pattern to ignore', async () => {
 	let server = utils.http({
 		single: true,
-		assets: /^[/]foo/
+		ignores: /^[/]foo/
 	});
 
 	try {
@@ -411,10 +394,10 @@ assets('should provide custom RegExp pattern to ignore', async () => {
 	}
 });
 
-assets('should provide custom String pattern to ignore', async () => {
+ignores('should provide custom String pattern to ignore', async () => {
 	let server = utils.http({
 		single: true,
-		assets: '^/foo'
+		ignores: '^/foo'
 	});
 
 	try {
@@ -437,10 +420,10 @@ assets('should provide custom String pattern to ignore', async () => {
 	}
 });
 
-assets('should provide mulitple RegExp patterns to ignore', async () => {
+ignores('should provide mulitple RegExp patterns to ignore', async () => {
 	let server = utils.http({
 		single: true,
-		assets: [/^[/]foo/, /bar/]
+		ignores: [/^[/]foo/, /bar/]
 	});
 
 	try {
@@ -459,10 +442,10 @@ assets('should provide mulitple RegExp patterns to ignore', async () => {
 	}
 });
 
-assets('should provide mulitple String patterns to ignore', async () => {
+ignores('should provide mulitple String patterns to ignore', async () => {
 	let server = utils.http({
 		single: true,
-		assets: ['^/foo', 'bar']
+		ignores: ['^/foo', 'bar']
 	});
 
 	try {
@@ -481,7 +464,7 @@ assets('should provide mulitple String patterns to ignore', async () => {
 	}
 });
 
-assets.run();
+ignores.run();
 
 // ---
 
