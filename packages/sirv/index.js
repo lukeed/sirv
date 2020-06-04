@@ -129,15 +129,17 @@ export default function (dir, opts={}) {
 	let cc = opts.maxAge != null && `public,max-age=${opts.maxAge}`;
 	if (cc && opts.immutable) cc += ',immutable';
 
-	list(dir, (name, abs, stats) => {
-		if (/\.well-known[\\+\/]/.test(name)) {} // keep
-		else if (!opts.dotfiles && /(^\.|[\\+|\/+]\.)/.test(name)) return;
+	if (!opts.dev) {
+		list(dir, (name, abs, stats) => {
+			if (/\.well-known[\\+\/]/.test(name)) {} // keep
+			else if (!opts.dotfiles && /(^\.|[\\+|\/+]\.)/.test(name)) return;
 
-		let headers = toHeaders(name, stats, isEtag);
-		if (cc) headers['Cache-Control'] = cc;
+			let headers = toHeaders(name, stats, isEtag);
+			if (cc) headers['Cache-Control'] = cc;
 
-		FILES['/' + name.normalize().replace(/\\+/g, '/')] = { abs, stats, headers };
-	});
+			FILES['/' + name.normalize().replace(/\\+/g, '/')] = { abs, stats, headers };
+		});
+	}
 
 	let lookup = opts.dev ? viaLocal.bind(0, ignores, dir, isEtag) : viaCache.bind(0, ignores);
 
