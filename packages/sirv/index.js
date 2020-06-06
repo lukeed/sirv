@@ -7,18 +7,20 @@ import mime from 'mime/lite';
 const FILES = {};
 const noop = () => {};
 
-function toAssume(uri, extns, toIgnore) {
+function isMatch(uri, arr) {
+	for (let i=0; i < arr.length; i++) {
+		if (arr[i].test(uri)) return true;
+	}
+}
+
+function toAssume(uri, extns) {
 	let i=0, x, len=uri.length - 1;
 	if (uri.charCodeAt(len) === 47) {
 		uri = uri.substring(0, len);
 	}
 
-	for (; i < toIgnore.length; i++) {
-		if (toIgnore[i].test(uri)) return [uri];
-	}
-
 	let arr=[], tmp=`${uri}/index`;
-	for (i=0; i < extns.length; i++) {
+	for (; i < extns.length; i++) {
 		x = extns[i] ? `.${extns[i]}` : '';
 		if (uri) arr.push(uri + x);
 		arr.push(tmp + x);
@@ -27,15 +29,15 @@ function toAssume(uri, extns, toIgnore) {
 	return arr;
 }
 
-function viaCache(ignores, uri, extns) {
-	let i=0, data, arr=toAssume(uri, extns, ignores);
+function viaCache(uri, extns) {
+	let i=0, data, arr=toAssume(uri, extns);
 	for (; i < arr.length; i++) {
 		if (data = FILES[arr[i]]) return data;
 	}
 }
 
-function viaLocal(ignores, dir, isEtag, uri, extns) {
-	let i=0, arr=toAssume(uri, extns, ignores);
+function viaLocal(dir, isEtag, uri, extns) {
+	let i=0, arr=toAssume(uri, extns);
 	let abs, stats, name, headers;
 	for (; i < arr.length; i++) {
 		abs = normalize(join(dir, name=arr[i]));
@@ -141,7 +143,7 @@ export default function (dir, opts={}) {
 		});
 	}
 
-	let lookup = opts.dev ? viaLocal.bind(0, ignores, dir, isEtag) : viaCache.bind(0, ignores);
+	let lookup = opts.dev ? viaLocal.bind(0, dir, isEtag) : viaCache;
 
 	return function (req, res, next) {
 		let extns = [];
@@ -151,7 +153,7 @@ export default function (dir, opts={}) {
 		extns = extns.concat('', extensions); // [...br, ...gz, orig, ...exts]
 
 		let pathname = req.path || parser(req, true).pathname;
-		let data = lookup(pathname, extns) || isSPA && lookup(fallback, extns);
+		let data = lookup(pathname, extns) || isSPA && !isMatch(pathname, ignores) && lookup(fallback, extns);
 		if (!data) return next ? next() : isNotFound(req, res);
 
 		if (isEtag && req.headers['if-none-match'] === data.headers['ETag']) {

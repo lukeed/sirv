@@ -191,7 +191,9 @@ index.run();
 const extensions = suite('extensions');
 
 extensions('should limit which extensions are assumed for index lookup', async () => {
-	let server = utils.http({ extensions: ['html'] });
+	let server = utils.http({
+		extensions: ['html']
+	});
 
 	try {
 		await server.send('GET', '/about').catch(err => {
@@ -300,9 +302,6 @@ single('should serve root "index.html" for paths without assets', async () => {
 
 		let res3 = await server.send('GET', '/about/foobar');
 		await utils.matches(res3, 200, 'index.html', 'utf8');
-
-		let res4 = await server.send('GET', '/bundle.foobar.js');
-		await utils.matches(res4, 200, 'index.html', 'utf8');
 	} finally {
 		server.close();
 	}
