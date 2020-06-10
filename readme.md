@@ -25,7 +25,8 @@ $ wrk -t8 -c100 -d10s http://localhost:3000/
 > **Note:** Expand each section to view results :thinking:
 
 <details>
-<summary>GET "/" (200)</summary>
+<summary><strong>GET "/" (200)</strong></summary>
+
 ```
 serve-static
 ---
@@ -57,7 +58,8 @@ Transfer/sec:      1.88MB
 </details>
 
 <details>
-<summary>GET "/asset.js" (200)</summary>
+<summary><strong>GET "/asset.js" (200)</strong></summary>
+
 ```
 serve-static
 ---
@@ -89,7 +91,8 @@ Transfer/sec:      3.01MB
 </details>
 
 <details>
-<summary>GET "/404.css" (404)</summary>
+<summary><strong>GET "/404.css" (404)</strong></summary>
+
 ```
 serve-static
 ---

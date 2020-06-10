@@ -115,6 +115,8 @@ When using `sirv-cli` for production file-serving, you should:
 
 1) Ensure `--dev` is not used
 2) Enable HTTP/2 (`--http2`) with valid key and cert
+3) Precompile brotli and/or gzip file variants
+4) Enable `--gzip` and/or `--brotli` flags
 
 For maximum performance, you should also use `--quiet` to disable the I/O from logging.
 
