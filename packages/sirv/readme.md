@@ -114,10 +114,10 @@ lookup([
 
 // Request: [Accept-Encoding: gzip] "/"
 lookup([
-  '/index.html.gz'
-  '/index.htm.gz'
-  '/index.html'
-  '/index.htm'
+  '/index.html.gz',
+  '/index.htm.gz',
+  '/index.html',
+  '/index.htm',
 ]);
 ```
 
@@ -178,7 +178,7 @@ Default: `false`
 
 Treat the directory as a single-page application.
 
-When `true`, the directory's index page (eg, `index.html`) will be sent if the request asset does not exist.<br>
+When `true`, the directory's index page (default `index.html`) will be sent if the request asset does not exist.<br>
 You may pass a `string` value to use a file _instead of_ `index.html` as your fallback.
 
 For example, if "/about" is requested but no variants of that file exist, then the response for "/" is sent instead:
