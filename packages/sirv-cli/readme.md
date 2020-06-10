@@ -22,8 +22,6 @@
 
 Quickly start a server to preview the assets of _any_ directory!
 
-Just like [`serve`](https://github.com/zeit/serve), you may install and use `sirv-cli` globally or on a per-project basis.
-
 
 ## Install
 
@@ -35,79 +33,95 @@ $ npm install --save sirv-cli
 
 ## Usage
 
-Running `sirv` as a standalone command is an alias of `sirv start`, with the sole exception of displaying help text!
-
-> **Note:** This is because `sirv-cli` may include new commands in the future. <br>For example, compression may be extracted to a `compress` command, or `watch` may be added.
+> **Important:** The `HOST` and `PORT` environment variables will override the `--host` and `--port` flags, respectively.
 
 ```
 $ sirv --help
 
-  Usage
-    $ sirv <command> [options]
-
-  Available Commands
-    start    Start a static file server.
-
-  For more info, run any command with the `--help` flag
-    $ sirv start --help
-
-  Options
-    -v, --version    Displays current version
-    -h, --help       Displays this message
-
-  Examples
-    $ sirv build --cors --port 8080
-    $ sirv start build --cors --port 8080
-    $ sirv public --quiet --etag --maxage 31536000 --immutable
-    $ sirv public --http2 --key priv.pem --cert cert.pem
-    $ sirv start public -qeim 31536000
-    $ sirv start public --assets /static/
-    $ sirv --port 8080 --etag
-    $ sirv my-app --dev
-```
-
-```
-$ sirv start --help
-
   Description
-    Start a static file server.
+    Run a static file server
 
   Usage
-    $ sirv start [dir] [options]
+    $ sirv [dir] [options]
 
   Options
     -D, --dev          Enable "dev" mode
     -e, --etag         Enable "ETag" header
     -d, --dotfiles     Enable dotfile asset requests
     -c, --cors         Enable "CORS" headers to allow any origin requestor
+    -G, --gzip         Send precompiled "*.gz" files when "gzip" is supported  (default true)
+    -B, --brotli       Send precompiled "*.br" files when "brotli" is supported  (default true)
     -m, --maxage       Enable "Cache-Control" header & define its "max-age" value (sec)
     -i, --immutable    Enable the "immutable" directive for "Cache-Control" header
-    -H, --http2        Enable the HTTP/2 protocol. Requires Node.js 8.4.0+
+    -k, --http2        Enable the HTTP/2 protocol. Requires Node.js 8.4.0+
     -C, --cert         Path to certificate file for HTTP/2 server
     -K, --key          Path to certificate key for HTTP/2 server
-    -s, --single       Serve single-page applications
-    -a, --assets       Prefix for the asset files of single-page applications
+    -P, --pass         Passphrase to decrypt a certificate key
+    -s, --single       Serve as single-page application with "index.html" fallback
+    -I, --ignores      Any URL pattern(s) to ignore "index.html" assumptions
     -q, --quiet        Disable logging to terminal
     -H, --host         Hostname to bind  (default localhost)
     -p, --port         Port to bind  (default 5000)
+    -v, --version      Displays current version
     -h, --help         Displays this message
-```
 
-> **Note:** The `HOST` and `PORT` environment variables will override flag values.
+  Examples
+    $ sirv build --cors --port 8080
+    $ sirv public --quiet --etag --maxage 31536000 --immutable
+    $ sirv public --http2 --key priv.pem --cert cert.pem
+    $ sirv public -qeim 31536000
+    $ sirv --port 8080 --etag
+    $ sirv --dev
+
+```
 
 
 ## HTTP/2
 
-Running a HTTP/2 server is available to users running Node.js v8.4.0 or later.<br>
-However, since no browsers support [unencrypted HTTP/2](https://http2.github.io/faq/#does-http2-require-encryption), you must provide `--key` and `--cert` options to `sirv-cli`. These are read and passed to [`http2.createSecureServer`](https://nodejs.org/api/http2.html#http2_http2_createsecureserver_options_onrequesthandler), which is necessary for browser clients to connect.
+> **Note:** Requires Node.js v8.4.0 or later.
+
+The `--key` and `--cert` flags are required since no browsers support [unencrypted HTTP/2](https://http2.github.io/faq/#does-http2-require-encryption).<br>These must be valid file paths (resolved from `process.cwd()`), which are read and passed into [`http2.createSecureServer`](https://nodejs.org/api/http2.html#http2_http2_createsecureserver_options_onrequesthandler).
 
 You can generate a certificate and key for local development quickly with:
 
 ```sh
 $ openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/CN=localhost' \
   -keyout localhost-privkey.pem -out localhost-cert.pem
+
+# Now we can run a HTTP/2 server
+$ sirv --http2 --key localhost-privkey.pem --cert localhost-cert.pem
 ```
 
+
+## Single Page Applications
+
+You must pass the `--single` flag to enable single-page application ("SPA") mode. This will, for example, serve your directory's `index.html` file when an unknown _path_ (eg; `/foo/bar`) does not resolve to another page.
+
+> **Note:** Please refer to [`opts.single`](https://github.com/lukeed/sirv/tree/master/packages/sirv#optssingle) for the lookup sequence.
+
+Any asset requests (URLs that end with an extension) ignore `--single` behavior and will send a `404` response instead of the "index.html" fallback. To ignore additional paths, pass URL patterns to the `--ignores` argument.
+
+```sh
+# Don't include "/blog*" or "/portfolio*" pages into SPA
+$ sirv public --single --ignores "^/blog" --ignores "^/portfolio"
+```
+
+You may pass a string to customize which file should be sent as fallback.<br>In other words, `--single shell.html` will send the directory's `shell.html` file instead of its `index.html` file.
+
+
+## Production
+
+When using `sirv-cli` for production file-serving, you should:
+
+1) Ensure `--dev` is not used
+2) Enable HTTP/2 (`--http2`) with valid key and cert
+
+For maximum performance, you should also use `--quiet` to disable the I/O from logging.
+
+> **Notice:**<br>
+While `sirv-cli` is certainly "production ready", using a CDN in production is always recommended.<br>
+Especially when performance is a concern, there are much better solutions than using Node.js as a file server.<br>
+Most everything has HTTP/2 and "SPA" support nowadays – consider NGINX or [h2o](https://h2o.examp1e.net/).
 
 ## License
 
