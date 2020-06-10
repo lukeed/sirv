@@ -146,11 +146,11 @@ export default function (dir, opts={}) {
 	let lookup = opts.dev ? viaLocal.bind(0, dir, isEtag) : viaCache;
 
 	return function (req, res, next) {
-		let extns = [];
+		let extns = [''];
 		let val = req.headers['accept-encoding'] || '';
-		if (gzips && val.includes('gzip')) extns=gzips.concat(extns);
-		if (brots && /(br|brotli)/i.test(val)) extns=brots.concat(extns);
-		extns = extns.concat('', extensions); // [...br, ...gz, orig, ...exts]
+		if (gzips && val.includes('gzip')) extns.unshift(...gzips);
+		if (brots && /(br|brotli)/i.test(val)) extns.unshift(...brots);
+		extns.push(...extensions); // [...br, ...gz, orig, ...exts]
 
 		let pathname = req.path || parser(req, true).pathname;
 		let data = lookup(pathname, extns) || isSPA && !isMatch(pathname, ignores) && lookup(fallback, extns);
