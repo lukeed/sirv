@@ -1,10 +1,17 @@
-const fs = require('fs');
-const { join, normalize, resolve } = require('path');
-const parser = require('@polka/url');
-const mime = require('mime/lite');
+import * as fs from 'fs';
+import { join, normalize, resolve } from 'path';
+import list from 'totalist/sync';
+import parser from '@polka/url';
+import mime from 'mime/lite';
 
 const FILES = {};
 const noop = () => {};
+
+function isMatch(uri, arr) {
+	for (let i=0; i < arr.length; i++) {
+		if (arr[i].test(uri)) return true;
+	}
+}
 
 function toAssume(uri, extns) {
 	let i=0, x, len=uri.length - 1;
@@ -14,7 +21,7 @@ function toAssume(uri, extns) {
 
 	let arr=[], tmp=`${uri}/index`;
 	for (; i < extns.length; i++) {
-		x = '.' + extns[i];
+		x = extns[i] ? `.${extns[i]}` : '';
 		if (uri) arr.push(uri + x);
 		arr.push(tmp + x);
 	}
@@ -22,10 +29,25 @@ function toAssume(uri, extns) {
 	return arr;
 }
 
-function find(uri, extns) {
+function viaCache(uri, extns) {
 	let i=0, data, arr=toAssume(uri, extns);
 	for (; i < arr.length; i++) {
 		if (data = FILES[arr[i]]) return data;
+	}
+}
+
+function viaLocal(dir, isEtag, uri, extns) {
+	let i=0, arr=toAssume(uri, extns);
+	let abs, stats, name, headers;
+	for (; i < arr.length; i++) {
+		abs = normalize(join(dir, name=arr[i]));
+		if (abs.startsWith(dir) && fs.existsSync(abs)) {
+			stats = fs.statSync(abs);
+			if (stats.isDirectory()) continue;
+			headers = toHeaders(name, stats, isEtag);
+			headers['Cache-Control'] = 'no-store';
+			return { abs, stats, headers };
+		}
 	}
 }
 
@@ -33,20 +55,12 @@ function is404(req, res) {
 	return (res.statusCode=404,res.end());
 }
 
-function list(dir, fn, pre='') {
-	let i=0, abs, stats;
-	let arr = fs.readdirSync(dir);
-	for (; i < arr.length; i++) {
-		abs = join(dir, arr[i]);
-		stats = fs.statSync(abs);
-		stats.isDirectory()
-			? list(abs, fn, join(pre, arr[i]))
-			: fn(join(pre, arr[i]), abs, stats);
-	}
-}
-
 function send(req, res, file, stats, headers={}) {
-	let code=200, opts={};
+	let code=200, tmp, opts={}
+
+	if (tmp = res.getHeader('content-type')) {
+		headers['Content-Type'] = tmp;
+	}
 
 	if (req.headers.range) {
 		code = 206;
@@ -69,58 +83,83 @@ function send(req, res, file, stats, headers={}) {
 	fs.createReadStream(file, opts).pipe(res);
 }
 
-module.exports = function (dir, opts={}) {
+function isEncoding(name, type, headers) {
+	headers['Content-Encoding'] = type;
+	headers['Content-Type'] = mime.getType(name.replace(/\.([^.]*)$/, '')) || '';
+}
+
+function toHeaders(name, stats, isEtag) {
+	let headers = {
+		'Content-Length': stats.size,
+		'Content-Type': mime.getType(name) || '',
+		'Last-Modified': stats.mtime.toUTCString(),
+	};
+	if (isEtag) headers['ETag'] = `W/"${stats.size}-${stats.mtime.getTime()}"`;
+	if (/\.br$/.test(name)) isEncoding(name, 'brotli', headers);
+	if (/\.gz$/.test(name)) isEncoding(name, 'gzip', headers);
+	return headers;
+}
+
+export default function (dir, opts={}) {
 	dir = resolve(dir || '.');
 
 	let isNotFound = opts.onNoMatch || is404;
-	let extensions = opts.extensions || ['html', 'htm'];
 	let setHeaders = opts.setHeaders || noop;
 
-	if (opts.dev) {
-		return function (req, res, next) {
-			let stats, file, uri=decodeURIComponent(req.path || req.pathname || parser(req).pathname);
-			let arr = [uri].concat(toAssume(uri, extensions)).map(x => normalize(join(dir, x))).filter(x => {
-				return x.startsWith(dir) && fs.existsSync(x);
-			});
+	let extensions = opts.extensions || ['html', 'htm'];
+	let gzips = opts.gzip && extensions.map(x => `${x}.gz`).concat('gz');
+	let brots = opts.brotli && extensions.map(x => `${x}.br`).concat('br');
 
-			while (file = arr.shift()) {
-				stats = fs.statSync(file);
-				if (stats.isDirectory()) continue;
-				setHeaders(res, uri, stats);
-				return send(req, res, file, stats, {
-					'Content-Type': mime.getType(file),
-					'Last-Modified': stats.mtime.toUTCString(),
-					'Content-Length': stats.size,
-				});
-			}
-			return next ? next() : isNotFound(req, res);
-		}
+	let fallback = '/';
+	let isEtag = !!opts.etag;
+	let isSPA = !!opts.single;
+	if (typeof opts.single === 'string') {
+		let idx = opts.single.lastIndexOf('.');
+		fallback += !!~idx ? opts.single.substring(0, idx) : opts.single;
+	}
+
+	let ignores = [];
+	if (opts.ignores !== false) {
+		ignores.push(/\w\.\w+$/); // any extn
+		if (opts.dotfiles) ignores.push(/\/\.\w/);
+		else ignores.push(/\/\.well-known/);
+		[].concat(opts.ignores || []).forEach(x => {
+			ignores.push(new RegExp(x, 'i'));
+		});
 	}
 
 	let cc = opts.maxAge != null && `public,max-age=${opts.maxAge}`;
 	if (cc && opts.immutable) cc += ',immutable';
 
-	list(dir, (name, abs, stats) => {
-		if (!opts.dotfiles && name.charAt(0) === '.') {
-			return;
-		}
+	if (!opts.dev) {
+		list(dir, (name, abs, stats) => {
+			if (/\.well-known[\\+\/]/.test(name)) {} // keep
+			else if (!opts.dotfiles && /(^\.|[\\+|\/+]\.)/.test(name)) return;
 
-		let headers = {
-			'Content-Length': stats.size,
-			'Content-Type': mime.getType(name),
-			'Last-Modified': stats.mtime.toUTCString(),
-		};
+			let headers = toHeaders(name, stats, isEtag);
+			if (cc) headers['Cache-Control'] = cc;
 
-		if (cc) headers['Cache-Control'] = cc;
-		if (opts.etag) headers['ETag'] = `W/"${stats.size}-${stats.mtime.getTime()}"`;
+			FILES['/' + name.normalize().replace(/\\+/g, '/')] = { abs, stats, headers };
+		});
+	}
 
-		FILES['/' + name.replace(/\\+/g, '/')] = { abs, stats, headers };
-	});
+	let lookup = opts.dev ? viaLocal.bind(0, dir, isEtag) : viaCache;
 
 	return function (req, res, next) {
-		let pathname = decodeURIComponent(req.path || req.pathname || parser(req).pathname);
-		let data = FILES[pathname] || find(pathname, extensions);
+		let extns = [''];
+		let val = req.headers['accept-encoding'] || '';
+		if (gzips && val.includes('gzip')) extns.unshift(...gzips);
+		if (brots && /(br|brotli)/i.test(val)) extns.unshift(...brots);
+		extns.push(...extensions); // [...br, ...gz, orig, ...exts]
+
+		let pathname = req.path || parser(req, true).pathname;
+		let data = lookup(pathname, extns) || isSPA && !isMatch(pathname, ignores) && lookup(fallback, extns);
 		if (!data) return next ? next() : isNotFound(req, res);
+
+		if (isEtag && req.headers['if-none-match'] === data.headers['ETag']) {
+			res.writeHead(304);
+			return res.end();
+		}
 
 		setHeaders(res, pathname, data.stats);
 		send(req, res, data.abs, data.stats, data.headers);

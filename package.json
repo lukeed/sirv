@@ -7,10 +7,16 @@
   },
   "scripts": {
     "pretest": "lerna bootstrap",
-    "test": "uvu tests"
+    "build": "lerna exec bundt index.js",
+    "test": "uvu -r esm tests -i public -i helpers"
   },
   "devDependencies": {
+    "bundt": "1.0.1",
+    "esm": "3.2.25",
+    "httpie": "2.0.0-next.7",
     "lerna": "3.21.0",
+    "mime": "2.4.5",
+    "selfsigned": "1.10.7",
     "uvu": "^0.0.10"
   }
 }
