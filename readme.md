@@ -14,59 +14,115 @@
 
 ## Benchmarks
 
-All benchmarks are taken using the same [Polka](https://github.com/lukeed/polka) application on Node v8.9.0.
+> Running the [`/bench`](/bench) directory with Node.js v10.13.0
 
-Please note that the actual numbers don't really matter; however, the percentage differences between them do!
+All results are taken with the following command:
 
-***File Exists***
-
-```
+```sh
 $ wrk -t8 -c100 -d10s http://localhost:3000/
 ```
 
+> **Note:** Expand each section to view results :thinking:
+
+<details>
+<summary>GET "/" (200)</summary>
 ```
 serve-static
-    Thread Stats   Avg      Stdev     Max   +/- Stdev
-        Latency     8.74ms  596.13us  14.44ms   79.26%
-        Req/Sec     1.38k    56.04     1.45k    69.62%
-      109872 requests in 10.02s, 40.66MB read
-    Requests/sec:  10969.49
-    Transfer/sec:      4.06MB
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     8.15ms    2.13ms  41.84ms   93.56%
+    Req/Sec     1.49k   231.02     1.78k    89.50%
+  118927 requests in 10.03s, 35.61MB read
+Requests/sec:  11862.86
+Transfer/sec:      3.55MB
 
-sirv
-    Thread Stats   Avg      Stdev     Max   +/- Stdev
-        Latency     7.87ms    2.53ms  15.59ms   81.37%
-        Req/Sec     1.53k    69.36     2.07k    71.25%
-      122047 requests in 10.03s, 33.87MB read
-    Requests/sec:  12174.15
-    Transfer/sec:      3.38MB
+sirv (dev: false)
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.78ms  495.92us   9.50ms   64.76%
+    Req/Sec     2.08k   112.73     2.42k    68.50%
+  166152 requests in 10.02s, 34.38MB read
+Requests/sec:  16586.47
+Transfer/sec:      3.43MB
+
+sirv (dev: true)
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    11.79ms    1.95ms  43.30ms   94.02%
+    Req/Sec     1.02k   121.86     1.33k    91.25%
+  81808 requests in 10.04s, 18.88MB read
+Requests/sec:   8147.26
+Transfer/sec:      1.88MB
 ```
+</details>
 
-***File Missing***
-
-```
-$ wrk -t8 -c100 -d10s http://localhost:3000/foobar
-```
-
+<details>
+<summary>GET "/asset.js" (200)</summary>
 ```
 serve-static
-    Thread Stats   Avg      Stdev     Max   +/- Stdev
-        Latency     4.00ms  257.09us   7.81ms   76.04%
-        Req/Sec     3.01k    65.66     3.15k    74.62%
-      239800 requests in 10.01s, 26.30MB read
-      Non-2xx or 3xx responses: 239800
-    Requests/sec:  23962.46
-    Transfer/sec:      2.63MB
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     8.12ms    1.39ms  22.96ms   92.01%
+    Req/Sec     1.49k   174.69     2.06k    73.38%
+  118413 requests in 10.02s, 34.89MB read
+Requests/sec:  11816.18
+Transfer/sec:      3.48MB
 
-sirv
-    Thread Stats   Avg      Stdev     Max   +/- Stdev
-        Latency     2.89ms  256.70us   6.62ms   72.19%
-        Req/Sec     4.17k   157.94     4.93k    75.22%
-      334715 requests in 10.10s, 44.69MB read
-      Non-2xx or 3xx responses: 334715
-    Requests/sec:  33130.72
-    Transfer/sec:      4.42MB
+sirv (dev: false)
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     5.64ms  507.55us   9.45ms   68.96%
+    Req/Sec     2.14k    86.26     2.30k    75.50%
+  170225 requests in 10.02s, 34.42MB read
+Requests/sec:  16996.46
+Transfer/sec:      3.44MB
+
+sirv (dev: true)
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     7.21ms  445.13us  12.04ms   85.69%
+    Req/Sec     1.67k    52.53     1.81k    76.88%
+  133246 requests in 10.02s, 30.12MB read
+Requests/sec:  13302.37
+Transfer/sec:      3.01MB
 ```
+</details>
+
+<details>
+<summary>GET "/404.css" (404)</summary>
+```
+serve-static
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     3.49ms  814.94us  19.10ms   94.89%
+    Req/Sec     3.48k   406.87     5.59k    95.03%
+  278809 requests in 10.10s, 28.18MB read
+  Non-2xx or 3xx responses: 278809
+Requests/sec:  27593.95
+Transfer/sec:      2.79MB
+
+sirv (dev: false)
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     2.27ms  328.88us  11.86ms   90.68%
+    Req/Sec     5.32k   390.13     6.26k    93.18%
+  426843 requests in 10.10s, 43.15MB read
+  Non-2xx or 3xx responses: 426843
+Requests/sec:  42256.52
+Transfer/sec:      4.27MB
+
+sirv (dev: true)
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    24.06ms    1.63ms  52.42ms   97.02%
+    Req/Sec   500.47     29.42   640.00     71.62%
+  39989 requests in 10.04s, 4.04MB read
+  Non-2xx or 3xx responses: 39989
+Requests/sec:   3982.45
+Transfer/sec:    412.25KB
+```
+</details>
+
 
 ## Notice
 
