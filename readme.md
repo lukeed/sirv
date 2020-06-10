@@ -1,4 +1,4 @@
-# sirv ![CI](https://github.com/lukeed/sirv/workflows/CI/badge.svg?branch=next&event=push)
+# sirv ![CI](https://github.com/lukeed/sirv/workflows/CI/badge.svg)
 
 > An optimized middleware & CLI application for serving static files~!
 

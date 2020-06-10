@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/npm/v/sirv-cli.svg" alt="version" />
   </a>
   <a href="https://github.com/lukeed/sirv/actions?query=workflow%3ACI+branch%3Anext">
-    <img src="https://github.com/lukeed/sirv/workflows/CI/badge.svg?branch=next&event=push" alt="CI" />
+    <img src="https://github.com/lukeed/sirv/workflows/CI/badge.svg?branch=master&event=tag" alt="CI" />
   </a>
   <a href="https://npmjs.org/package/sirv-cli">
     <img src="https://img.shields.io/npm/dm/sirv-cli.svg" alt="downloads" />

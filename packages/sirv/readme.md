@@ -1,4 +1,4 @@
-# sirv ![CI](https://github.com/lukeed/sirv/workflows/CI/badge.svg?branch=next&event=push)
+# sirv ![CI](https://github.com/lukeed/sirv/workflows/CI/badge.svg?branch=master&event=tag)
 
 > The optimized and lightweight middleware for serving requests to static assets
 
