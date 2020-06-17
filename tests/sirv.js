@@ -469,7 +469,7 @@ ignores.run();
 
 const dotfiles = suite('dotfiles');
 
-dotfiles('should reject hidden files (dotfiles) by default', async () => {
+dotfiles('should reject hidden files by default (dev: false)', async () => {
 	let server = utils.http();
 
 	try {
@@ -478,6 +478,30 @@ dotfiles('should reject hidden files (dotfiles) by default', async () => {
 		});
 
 		await server.send('GET', '/foo/.world').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		await server.send('GET', '/.hello.txt').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+	} finally {
+		server.close();
+	}
+});
+
+dotfiles('should reject hidden files by default (dev: true)', async () => {
+	let server = utils.http({ dev: true });
+
+	try {
+		await server.send('GET', '/.hello').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		await server.send('GET', '/foo/.world').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		await server.send('GET', '/.hello.txt').catch(err => {
 			assert.is(err.statusCode, 404);
 		});
 	} finally {
@@ -519,6 +543,9 @@ dotfiles('should allow requests to hidden files only when enabled', async () => 
 
 		let res2 = await server.send('GET', '/foo/.world');
 		await utils.matches(res2, 200, 'foo/.world', 'utf8');
+
+		let res3 = await server.send('GET', '/.hello.txt');
+		await utils.matches(res3, 200, '.hello.txt', 'utf8');
 	} finally {
 		server.close();
 	}
