@@ -95,7 +95,7 @@ function toHeaders(name, stats, isEtag) {
 		'Last-Modified': stats.mtime.toUTCString(),
 	};
 	if (isEtag) headers['ETag'] = `W/"${stats.size}-${stats.mtime.getTime()}"`;
-	if (/\.br$/.test(name)) isEncoding(name, 'brotli', headers);
+	if (/\.br$/.test(name)) isEncoding(name, 'br', headers);
 	if (/\.gz$/.test(name)) isEncoding(name, 'gzip', headers);
 	return headers;
 }
