@@ -86,10 +86,20 @@ You can generate a certificate and key for local development quickly with:
 
 ```sh
 $ openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/CN=localhost' \
-  -keyout localhost-privkey.pem -out localhost-cert.pem
+  -keyout localhost-key.pem -out localhost-cert.pem
 
 # Now we can run a HTTP/2 server
-$ sirv --http2 --key localhost-privkey.pem --cert localhost-cert.pem
+$ sirv --http2 --key localhost-key.pem --cert localhost-cert.pem
+```
+
+To bypass the "third party verification" error page, you may use [`mkcert`](https://github.com/FiloSottile/mkcert) to generate a locally-trusted development certificate:
+
+```sh
+$ mkcert -install
+$ mkcert -key-file localhost-key.pem -cert-file localhost-cert.pem localhost 127.0.0.1
+
+# Now we can run a HTTP/2 server with verified SSL
+$ sirv --http2 --key localhost-key.pem --cert localhost-cert.pem
 ```
 
 
