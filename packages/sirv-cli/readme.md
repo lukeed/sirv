@@ -92,6 +92,8 @@ $ openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/CN=localhost' \
 $ sirv --http2 --key localhost-privkey.pem --cert localhost-cert.pem
 ```
 
+> **Note:**  If you are receiving errors regarding verification by a third party, you will need to create a "local CA", please see https://github.com/lukeed/sirv/issues/67#issuecomment-646298862 for instructions.
+
 
 ## Single Page Applications
 
