@@ -41,6 +41,7 @@ help('--help', () => {
 
       Examples
         $ sirv build --cors --port 8080
+        $ sirv public --host
         $ sirv public --quiet --etag --maxage 31536000 --immutable
         $ sirv public --http2 --key priv.pem --cert cert.pem
         $ sirv public -qeim 31536000
