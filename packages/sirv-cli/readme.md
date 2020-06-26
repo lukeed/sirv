@@ -67,14 +67,24 @@ $ sirv --help
 
   Examples
     $ sirv build --cors --port 8080
-    $ sirv public --host # Expose to the network
     $ sirv public --quiet --etag --maxage 31536000 --immutable
     $ sirv public --http2 --key priv.pem --cert cert.pem
     $ sirv public -qeim 31536000
     $ sirv --port 8080 --etag
-    $ sirv --dev
+    $ sirv --host --dev
 
 ```
+
+## Network Access
+
+For security reasons, `sirv-cli` **does not** expose your server to the network by default.
+This means that your machine, _and only your machine_, will be able to access the `localhost` server.
+
+If, however, your coworker wants to access the server from their computer, or you want to preview your work on a mobile device, you must use the `--host` flag. Only _then_ will your server be accessible to other devices on the same network.
+
+Using `--host` without a value is equivalent to `--host 0.0.0.0`, which is makes it discoverable publicly. You may customize this by passing a different value – but you probably don't need to!
+
+> **Important:** Only the `Network:` address is accessible to others. The `Local:` address is still private to you.
 
 
 ## HTTP/2
