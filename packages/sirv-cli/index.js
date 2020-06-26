@@ -90,7 +90,7 @@ module.exports = function (dir, opts) {
 			stdout.write('\n' + PAD + colors.green('Your application is ready~! 🚀\n\n'));
 			isOther && stdout.write(PAD + colors.italic().dim(`➡ Port ${opts.port} is taken; using ${port} instead\n\n`));
 			stdout.write(PAD + `${colors.bold('- Local:')}      ${local}\n`);
-			/localhost/i.test(hostname) || stdout.write(PAD + `${colors.bold('- Network:')}    ${network}\n`);
+			stdout.write(PAD + `${colors.bold('- Network:')}    ${/localhost/i.test(hostname) ? colors.dim('Add `--host` to expose') : network}\n`);
 			let border = '─'.repeat(Math.min(stdout.columns, 36) / 2);
 			stdout.write('\n' + border + colors.inverse(' LOGS ') + border + '\n\n');
 		});

@@ -45,7 +45,7 @@ help('--help', () => {
         $ sirv public --http2 --key priv.pem --cert cert.pem
         $ sirv public -qeim 31536000
         $ sirv --port 8080 --etag
-        $ sirv --dev
+        $ sirv --host --dev
     `
 	);
 });
