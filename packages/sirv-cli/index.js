@@ -84,8 +84,7 @@ module.exports = function (dir, opts) {
 		server.listen(port, hostname, err => {
 			if (err) throw err;
 			if (opts.quiet) return;
-
-			clear(true); // wipe screen, but not history
+			if (opts.clear !== false) clear(true);
 			let { local, network } = laccess({ port, hostname, https });
 			stdout.write('\n' + PAD + colors.green('Your application is ready~! 🚀\n\n'));
 			isOther && stdout.write(PAD + colors.italic().dim(`➡ Port ${opts.port} is taken; using ${port} instead\n\n`));
