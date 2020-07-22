@@ -45,13 +45,13 @@ module.exports = function (dir, opts) {
 	let fn = sirv(dir, opts);
 	let { hrtime, stdout } = process;
 
-	if (opts.http2) {
-		if (semiver(process.version.substring(1), '8.4.0') < 0) {
+	if (opts.http2 || opts.https) {
+		if (opts.http2 && semiver(process.version.substring(1), '8.4.0') < 0) {
 			return exit('HTTP/2 requires Node v8.4.0 or greater');
 		}
 
 		if (!opts.key || !opts.cert) {
-			return exit('HTTP/2 requires "key" and "cert" values');
+			return exit((opts.http2 ? 'HTTP/2' : 'HTTPS') + ' requires "key" and "cert" values');
 		}
 
 		opts.key = readFileSync(opts.key);
@@ -59,7 +59,11 @@ module.exports = function (dir, opts) {
 		if (opts.cacert) opts.cacert = readFileSync(opts.cacert);
 		if (opts.pass) opts.passphrase = opts.pass;
 
-		server = require('http2').createSecureServer(opts, fn);
+		if (opts.http2) {
+			server = require('http2').createSecureServer(opts, fn);
+		} else {
+			server = require('https').createServer(opts, fn);
+		}
 	} else {
 		server = require('http').createServer(fn);
 	}

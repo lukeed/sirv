@@ -53,9 +53,10 @@ $ sirv --help
     -B, --brotli       Send precompiled "*.br" files when "brotli" is supported  (default true)
     -m, --maxage       Enable "Cache-Control" header & define its "max-age" value (sec)
     -i, --immutable    Enable the "immutable" directive for "Cache-Control" header
+    -S, --https        Enable the HTTPS protocol
     -k, --http2        Enable the HTTP/2 protocol. Requires Node.js 8.4.0+
-    -C, --cert         Path to certificate file for HTTP/2 server
-    -K, --key          Path to certificate key for HTTP/2 server
+    -C, --cert         Path to certificate file for HTTPS and HTTP/2 servers
+    -K, --key          Path to certificate key for HTTPS and HTTP/2 servers
     -P, --pass         Passphrase to decrypt a certificate key
     -s, --single       Serve as single-page application with "index.html" fallback
     -I, --ignores      Any URL pattern(s) to ignore "index.html" assumptions
