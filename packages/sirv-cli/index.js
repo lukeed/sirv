@@ -54,6 +54,7 @@ module.exports = function (dir, opts) {
 			return exit('HTTP/2 requires "key" and "cert" values');
 		}
 
+		opts.allowHTTP1 = true; // grace
 		opts.key = readFileSync(opts.key);
 		opts.cert = readFileSync(opts.cert);
 		if (opts.cacert) opts.cacert = readFileSync(opts.cacert);

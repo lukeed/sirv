@@ -149,4 +149,19 @@ http2('should start a HTTP/2 server with valid args', async () => {
 	}
 });
 
+http2('should have backward compatibility with HTTP/1', async () => {
+	let pems = selfsigned.generate();
+	let key = await utils.write('foobar.key2', pems.private);
+	let cert = await utils.write('foobar.cert2', pems.cert);
+
+	let server = await utils.spawn('--http2', '--key', key, '--cert', cert);
+
+	try {
+		let res = await server.send('GET', '/blog', { rejectUnauthorized: false });
+		await utils.matches(res, 200, 'blog.html', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
 http2.run();
