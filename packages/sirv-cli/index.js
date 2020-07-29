@@ -58,7 +58,7 @@ module.exports = function (dir, opts) {
 		opts.cert = readFileSync(opts.cert);
 		if (opts.cacert) opts.cacert = readFileSync(opts.cacert);
 		if (opts.pass) opts.passphrase = opts.pass;
-		if (opts.allowHTTP1 === undefined) opts.allowHTTP1 = true;
+		opts.allowHTTP1 = true;
 
 		server = require('http2').createSecureServer(opts, fn);
 	} else {
