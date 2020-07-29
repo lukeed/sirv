@@ -154,7 +154,7 @@ http2('should have backward compatibility with HTTP/1', async () => {
 	let key = await utils.write('foobar.key2', pems.private);
 	let cert = await utils.write('foobar.cert2', pems.cert);
 
-	let server = await utils.spawn('--http2', '--key', key, '--cert', cert);
+	let server = await utils.spawn('--http2', '--key', key, '--cert', cert, '--port', '5001');
 
 	try {
 		let res = await server.send('GET', '/blog', { rejectUnauthorized: false });
