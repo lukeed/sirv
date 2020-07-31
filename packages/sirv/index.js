@@ -55,13 +55,11 @@ function is404(req, res) {
 	return (res.statusCode=404,res.end());
 }
 
-function send(req, res, file, stats, baseHeaders={}) {
+function send(req, res, file, stats, headers={}) {
 	let code=200, tmp, opts={}
 
-	let headers = Object.assign({}, baseHeaders);
-
 	if (tmp = res.getHeader('content-type')) {
-		headers['Content-Type'] = tmp;
+		headers = { ...headers, 'Content-Type': tmp };
 	}
 
 	if (req.headers.range) {
@@ -75,7 +73,8 @@ function send(req, res, file, stats, baseHeaders={}) {
 			res.statusCode = 416;
 			return res.end();
 		}
-
+		
+		if (!tmp) headers = { ...headers };
 		headers['Content-Range'] = `bytes ${start}-${end}/${stats.size}`;
 		headers['Content-Length'] = (end - start + 1);
 		headers['Accept-Ranges'] = 'bytes';
