@@ -979,7 +979,31 @@ ranges('should throw `416` when range cannot be met (overflow)', async () => {
 	}
 });
 
-ranges('should not mutate response headers on subsequent non range requests :: prod', async () => {
+ranges('should not mutate response headers on subsequent non-Range requests :: dev', async () => {
+	let server = utils.http({ dev: true });
+
+	try {
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+
+		let headers = { Range: 'bytes=0-10' };
+		let res1 = await server.send('GET', '/bundle.67329.js', { headers });
+		assert.is(res1.statusCode, 200);
+		assert.is(res1.headers['content-length'], `${file.size}`);
+		assert.ok(res1.headers['content-range']);
+		assert.ok(res1.headers['accept-ranges']);
+
+		let res2 = await server.send('GET', '/bundle.67329.js');
+		assert.is(res2.statusCode, 200);
+		assert.is(res2.headers['content-length'], `${file.size}`);
+		assert.not(res2.headers['content-range']);
+		assert.not(res2.headers['accept-ranges']);
+
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should not mutate response headers on subsequent non-Range requests :: prod', async () => {
 	let server = utils.http({ dev: false });
 
 	try {
@@ -987,6 +1011,10 @@ ranges('should not mutate response headers on subsequent non range requests :: p
 
 		let headers = { Range: 'bytes=0-10' };
 		let res1 = await server.send('GET', '/bundle.67329.js', { headers });
+		assert.is(res1.statusCode, 200);
+		assert.is(res1.headers['content-length'], `${file.size}`);
+		assert.ok(res1.headers['content-range']);
+		assert.ok(res1.headers['accept-ranges']);
 
 		let res2 = await server.send('GET', '/bundle.67329.js');
 		assert.is(res2.statusCode, 200);
