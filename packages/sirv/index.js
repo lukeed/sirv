@@ -59,7 +59,7 @@ function send(req, res, file, stats, headers={}) {
 	let code=200, tmp, opts={}
 
 	if (tmp = res.getHeader('content-type')) {
-		headers['Content-Type'] = tmp;
+		headers = { ...headers, 'Content-Type': tmp };
 	}
 
 	if (req.headers.range) {
@@ -73,7 +73,8 @@ function send(req, res, file, stats, headers={}) {
 			res.statusCode = 416;
 			return res.end();
 		}
-
+		
+		if (!tmp) headers = { ...headers };
 		headers['Content-Range'] = `bytes ${start}-${end}/${stats.size}`;
 		headers['Content-Length'] = (end - start + 1);
 		headers['Accept-Ranges'] = 'bytes';
