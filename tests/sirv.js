@@ -979,6 +979,31 @@ ranges('should throw `416` when range cannot be met (overflow)', async () => {
 	}
 });
 
+ranges('should not mutate response headers on subsequent non range requests :: prod', async () => {
+	let server = utils.http({ dev: false });
+
+	try {
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+
+
+		let headers = { Range: 'bytes=0-10' };
+		let res1 = await server.send('GET', '/bundle.67329.js', { headers });
+		assert.is(res1.statusCode, 206);
+		assert.is(res1.headers['content-length'], '11');
+		assert.is(res1.headers['accept-ranges'], 'bytes');
+		assert.is(res1.headers['content-range'], `bytes 0-10/${file.size}`);
+
+		let res2 = await server.send('GET', '/bundle.67329.js', {});
+		assert.is(res2.statusCode, 200);
+		assert.is(res2.headers['content-length'], `${file.size}`);
+		assert.not(res2.headers['content-range']);
+		assert.not(res2.headers['accept-ranges']);
+
+	} finally {
+		server.close();
+	}
+});
+
 ranges.run();
 
 // ---
