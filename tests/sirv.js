@@ -1061,6 +1061,41 @@ setHeaders('should be able to customize "Content-Type" header', async () => {
 	}
 });
 
+setHeaders('should be able to customize "Cache-Control" header', async () => {
+	let server = utils.http({
+		maxAge: 100,
+		immutable: true,
+		setHeaders(res) {
+			res.setHeader('Cache-Control', 'private,foobar');
+		}
+	});
+
+	try {
+		let res = await server.send('GET', '/sw.js');
+		assert.is(res.headers['cache-control'], 'private,foobar');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+setHeaders('should be able to customize "Last-Modified" header', async () => {
+	let server = utils.http({
+		etag: true,
+		setHeaders(res) {
+			res.setHeader('Last-Modified', 'hello world');
+		}
+	});
+
+	try {
+		let res = await server.send('GET', '/sw.js');
+		assert.is(res.headers['last-modified'], 'hello world');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
 setHeaders('should receive "path" argument', async () => {
 	let server = utils.http({
 		setHeaders(res, path) {
