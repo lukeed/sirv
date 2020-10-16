@@ -28,6 +28,13 @@ function toAssume(uri, extns) {
 	return arr;
 }
 
+function viaCache(cache, uri, extns) {
+	let i=0, data, arr=toAssume(uri, extns);
+	for (; i < arr.length; i++) {
+		if (data = cache[arr[i]]) return data;
+	}
+}
+
 function viaLocal(dir, isEtag, uri, extns) {
 	let i=0, arr=toAssume(uri, extns);
 	let abs, stats, name, headers;
@@ -108,6 +115,8 @@ export default function (dir, opts={}) {
 	let gzips = opts.gzip && extensions.map(x => `${x}.gz`).concat('gz');
 	let brots = opts.brotli && extensions.map(x => `${x}.br`).concat('br');
 
+	const FILES = {};
+
 	let fallback = '/';
 	let isEtag = !!opts.etag;
 	let isSPA = !!opts.single;
@@ -129,8 +138,6 @@ export default function (dir, opts={}) {
 	let cc = opts.maxAge != null && `public,max-age=${opts.maxAge}`;
 	if (cc && opts.immutable) cc += ',immutable';
 
-	const FILES = {};
-
 	if (!opts.dev) {
 		list(dir, (name, abs, stats) => {
 			if (/\.well-known[\\+\/]/.test(name)) {} // keep
@@ -143,12 +150,7 @@ export default function (dir, opts={}) {
 		});
 	}
 
-	let lookup = opts.dev ? viaLocal.bind(0, dir, isEtag) : function viaCache(uri, extns) {
-		let i=0, data, arr=toAssume(uri, extns);
-		for (; i < arr.length; i++) {
-			if (data = FILES[arr[i]]) return data;
-		}
-	};
+	let lookup = opts.dev ? viaLocal.bind(0, dir, isEtag) : viaCache.bind(0, FILES);
 
 	return function (req, res, next) {
 		let extns = [''];
