@@ -137,6 +137,7 @@ export default function (dir, opts={}) {
 
 	let cc = opts.maxAge != null && `public,max-age=${opts.maxAge}`;
 	if (cc && opts.immutable) cc += ',immutable';
+	else if (cc && opts.maxAge === 0) cc += ',must-revalidate';
 
 	if (!opts.dev) {
 		list(dir, (name, abs, stats) => {

@@ -800,7 +800,7 @@ maxAge('should accept `0` value', async () => {
 
 	try {
 		let res = await server.send('GET', '/bundle.67329.js');
-		assert.is(res.headers['cache-control'], 'public,max-age=0');
+		assert.is(res.headers['cache-control'], 'public,max-age=0,must-revalidate');
 	} finally {
 		server.close();
 	}
