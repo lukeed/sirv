@@ -4,7 +4,6 @@ import list from 'totalist/sync';
 import parser from '@polka/url';
 import mime from 'mime/lite';
 
-const FILES = {};
 const noop = () => {};
 
 function isMatch(uri, arr) {
@@ -29,10 +28,10 @@ function toAssume(uri, extns) {
 	return arr;
 }
 
-function viaCache(uri, extns) {
+function viaCache(cache, uri, extns) {
 	let i=0, data, arr=toAssume(uri, extns);
 	for (; i < arr.length; i++) {
-		if (data = FILES[arr[i]]) return data;
+		if (data = cache[arr[i]]) return data;
 	}
 }
 
@@ -116,6 +115,8 @@ export default function (dir, opts={}) {
 	let gzips = opts.gzip && extensions.map(x => `${x}.gz`).concat('gz');
 	let brots = opts.brotli && extensions.map(x => `${x}.br`).concat('br');
 
+	const FILES = {};
+
 	let fallback = '/';
 	let isEtag = !!opts.etag;
 	let isSPA = !!opts.single;
@@ -149,7 +150,7 @@ export default function (dir, opts={}) {
 		});
 	}
 
-	let lookup = opts.dev ? viaLocal.bind(0, dir, isEtag) : viaCache;
+	let lookup = opts.dev ? viaLocal.bind(0, dir, isEtag) : viaCache.bind(0, FILES);
 
 	return function (req, res, next) {
 		let extns = [''];
