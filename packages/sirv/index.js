@@ -4,7 +4,6 @@ import list from 'totalist/sync';
 import parser from '@polka/url';
 import mime from 'mime/lite';
 
-const FILES = {};
 const noop = () => {};
 
 function isMatch(uri, arr) {
@@ -27,13 +26,6 @@ function toAssume(uri, extns) {
 	}
 
 	return arr;
-}
-
-function viaCache(uri, extns) {
-	let i=0, data, arr=toAssume(uri, extns);
-	for (; i < arr.length; i++) {
-		if (data = FILES[arr[i]]) return data;
-	}
 }
 
 function viaLocal(dir, isEtag, uri, extns) {
@@ -137,6 +129,8 @@ export default function (dir, opts={}) {
 	let cc = opts.maxAge != null && `public,max-age=${opts.maxAge}`;
 	if (cc && opts.immutable) cc += ',immutable';
 
+	const FILES = {};
+
 	if (!opts.dev) {
 		list(dir, (name, abs, stats) => {
 			if (/\.well-known[\\+\/]/.test(name)) {} // keep
@@ -149,7 +143,12 @@ export default function (dir, opts={}) {
 		});
 	}
 
-	let lookup = opts.dev ? viaLocal.bind(0, dir, isEtag) : viaCache;
+	let lookup = opts.dev ? viaLocal.bind(0, dir, isEtag) : function viaCache(uri, extns) {
+		let i=0, data, arr=toAssume(uri, extns);
+		for (; i < arr.length; i++) {
+			if (data = FILES[arr[i]]) return data;
+		}
+	};
 
 	return function (req, res, next) {
 		let extns = [''];
