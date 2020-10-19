@@ -44,6 +44,7 @@ module.exports = function (dir, opts) {
 	let server;
 	let fn = sirv(dir, opts);
 	let { hrtime, stdout } = process;
+	let isLog = opts.logs !== false;
 
 	if (opts.http2) {
 		if (semiver(process.version.substring(1), '8.4.0') < 0) {
@@ -65,7 +66,7 @@ module.exports = function (dir, opts) {
 		server = require('http').createServer(fn);
 	}
 
-	if (!opts.quiet) {
+	if (isLog && !opts.quiet) {
 		let uri, dur, start, dash=colors.gray(' ─ ');
 		server.on('request', (req, res) => {
 			start = hrtime();
@@ -90,9 +91,9 @@ module.exports = function (dir, opts) {
 			stdout.write('\n' + PAD + colors.green('Your application is ready~! 🚀\n\n'));
 			isOther && stdout.write(PAD + colors.italic().dim(`➡ Port ${opts.port} is taken; using ${port} instead\n\n`));
 			stdout.write(PAD + `${colors.bold('- Local:')}      ${local}\n`);
-			stdout.write(PAD + `${colors.bold('- Network:')}    ${/localhost/i.test(hostname) ? colors.dim('Add `--host` to expose') : network}\n`);
+			stdout.write(PAD + `${colors.bold('- Network:')}    ${/localhost/i.test(hostname) ? colors.dim('Add `--host` to expose') : network}\n\n`);
 			let border = '─'.repeat(Math.min(stdout.columns, 36) / 2);
-			stdout.write('\n' + border + colors.inverse(' LOGS ') + border + '\n\n');
+			if (isLog) stdout.write(border + colors.inverse(' LOGS ') + border + '\n\n');
 		});
 	});
 }
