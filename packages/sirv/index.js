@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { join, normalize, resolve } from 'path';
-import list from 'totalist/sync';
+import { totalist } from 'totalist/sync';
 import parser from '@polka/url';
 import mime from 'mime/lite';
 
@@ -140,7 +140,7 @@ export default function (dir, opts={}) {
 	else if (cc && opts.maxAge === 0) cc += ',must-revalidate';
 
 	if (!opts.dev) {
-		list(dir, (name, abs, stats) => {
+		totalist(dir, (name, abs, stats) => {
 			if (/\.well-known[\\+\/]/.test(name)) {} // keep
 			else if (!opts.dotfiles && /(^\.|[\\+|\/+]\.)/.test(name)) return;
 
