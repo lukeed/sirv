@@ -1,6 +1,6 @@
 {
   "name": "sirv-cli",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A lightweight CLI program to serve static sites~!",
   "repository": "lukeed/sirv",
   "main": "index.js",
@@ -26,7 +26,7 @@
     "local-access": "^1.0.1",
     "sade": "^1.6.0",
     "semiver": "^1.0.0",
-    "sirv": "^1.0.7",
+    "sirv": "^1.0.9",
     "tinydate": "^1.0.0"
   }
 }
