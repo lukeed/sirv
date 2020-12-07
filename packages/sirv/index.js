@@ -44,7 +44,7 @@ function viaLocal(dir, isEtag, uri, extns) {
 			stats = fs.statSync(abs);
 			if (stats.isDirectory()) continue;
 			headers = toHeaders(name, stats, isEtag);
-			headers['Cache-Control'] = 'no-store';
+			headers['Cache-Control'] = isEtag ? 'no-cache' : 'no-store';
 			return { abs, stats, headers };
 		}
 	}

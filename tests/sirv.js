@@ -602,6 +602,17 @@ dev('should not rely on file cached data', async () => {
 	}
 });
 
+dev('should set default `Cache-Control` header value', async () => {
+	let server = utils.http({ dev: true });
+
+	try {
+		let res1 = await server.send('GET', '/bundle.67329.js');
+		assert.is(res1.headers['cache-control'], 'no-store');
+	} finally {
+		server.close();
+	}
+});
+
 dev.run();
 
 // ---
@@ -638,6 +649,22 @@ etag('should allow "If-None-Match" directive to function', async () => {
 	try {
 		let res1 = await server.send('GET', '/bundle.67329.js');
 		assert.is(res1.statusCode, 200, 'normal request');
+
+		let headers = { 'If-None-Match': res1.headers['etag'] };
+		let res2 = await server.send('GET', '/bundle.67329.js', { headers });
+		assert.is(res2.statusCode, 304, 'send 304 for "no change" signal');
+		assert.is(res2.data, '', 'send empty response body');
+	} finally {
+		server.close();
+	}
+});
+
+etag('should force `Cache-Control` header in `dev` mode', async () => {
+	let server = utils.http({ etag: true, dev: true });
+
+	try {
+		let res1 = await server.send('GET', '/bundle.67329.js');
+		assert.is(res1.headers['cache-control'], 'no-cache');
 
 		let headers = { 'If-None-Match': res1.headers['etag'] };
 		let res2 = await server.send('GET', '/bundle.67329.js', { headers });
