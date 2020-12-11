@@ -19,6 +19,7 @@ help('--help', () => {
         $ sirv [dir] [options]
 
       Options
+        --clear            Clear terminal  (default true)
         -D, --dev          Enable "dev" mode
         -e, --etag         Enable "ETag" header
         -d, --dotfiles     Enable dotfile asset requests
