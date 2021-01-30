@@ -169,6 +169,10 @@ export default function (dir, opts={}) {
 			return res.end();
 		}
 
+		if (gzips || brots) {
+			res.setHeader('Vary', 'Accept-Encoding');
+		}
+
 		setHeaders(res, pathname, data.stats);
 		send(req, res, data.abs, data.stats, data.headers);
 	};
