@@ -79,7 +79,6 @@ module.exports = function (dir, opts) {
 	}
 
 	opts.port = PORT || opts.port;
-	if (opts.noclear === true) opts.clear = false;
 	let hostname = HOST || opts.host || '0.0.0.0';
 	toPort({ host: hostname, port: opts.port }).then(port => {
 		let isOther = port != opts.port;
