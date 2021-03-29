@@ -123,6 +123,32 @@ encode('should work when the request path contains encoded characters :: prod', 
 	}
 });
 
+encode(`should work when the request path contains space encoded :: dev`, async () => {
+	let server = utils.http({ dev:  true});
+
+	try {
+		let res = await server.send('GET', '/with%20space.txt');
+		assert.is(res.headers['content-type'], 'text/plain');
+		assert.is(res.data, 'with space.txt\n');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+encode(`should work when the request path contains space encoded :: prod`, async () => {
+	let server = utils.http({ dev: false});
+
+	try {
+		let res = await server.send('GET', '/with%20space.txt');
+		assert.is(res.headers['content-type'], 'text/plain');
+		assert.is(res.data, 'with space.txt\n');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
 encode.run();
 
 // ---
