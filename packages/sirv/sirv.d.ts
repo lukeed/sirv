@@ -17,6 +17,7 @@ declare module 'sirv' {
 		dotfiles?: boolean;
 		brotli?: boolean;
 		gzip?: boolean;
+		mimeOverride?: { [key: string]: string },
 		onNoMatch?: (req: IncomingMessage, res: ServerResponse) => void;
 		setHeaders?: (res: ServerResponse, pathname: string, stats: Stats) => void;
 	}

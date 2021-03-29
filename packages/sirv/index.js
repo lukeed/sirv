@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import path from 'path';
 import { join, normalize, resolve } from 'path';
 import list from 'totalist/sync';
 import parser from '@polka/url';
@@ -88,20 +89,20 @@ function send(req, res, file, stats, headers) {
 	fs.createReadStream(file, opts).pipe(res);
 }
 
-function isEncoding(name, type, headers) {
+function isEncoding(name, type, headers, getMimeType) {
 	headers['Content-Encoding'] = type;
-	headers['Content-Type'] = mime.getType(name.replace(/\.([^.]*)$/, '')) || '';
+	headers['Content-Type'] = getMimeType(name.replace(/\.([^.]*)$/, '')) || '';
 }
 
-function toHeaders(name, stats, isEtag) {
+function toHeaders(name, stats, isEtag, getMimeType) {
 	let headers = {
 		'Content-Length': stats.size,
-		'Content-Type': mime.getType(name) || '',
+		'Content-Type': getMimeType(name) || '',
 		'Last-Modified': stats.mtime.toUTCString(),
 	};
 	if (isEtag) headers['ETag'] = `W/"${stats.size}-${stats.mtime.getTime()}"`;
-	if (/\.br$/.test(name)) isEncoding(name, 'br', headers);
-	if (/\.gz$/.test(name)) isEncoding(name, 'gzip', headers);
+	if (/\.br$/.test(name)) isEncoding(name, 'br', headers, getMimeType);
+	if (/\.gz$/.test(name)) isEncoding(name, 'gzip', headers, getMimeType);
 	return headers;
 }
 
@@ -139,12 +140,20 @@ export default function (dir, opts={}) {
 	if (cc && opts.immutable) cc += ',immutable';
 	else if (cc && opts.maxAge === 0) cc += ',must-revalidate';
 
+	function getMimeType(extension) {
+		const extname = path.extname(extension).substr(1);
+		if (opts.mimeOverride && opts.mimeOverride[extname]) {
+			return opts.mimeOverride[extname];
+		}
+		return mime.getType(extension);
+	}
+
 	if (!opts.dev) {
 		list(dir, (name, abs, stats) => {
 			if (/\.well-known[\\+\/]/.test(name)) {} // keep
 			else if (!opts.dotfiles && /(^\.|[\\+|\/+]\.)/.test(name)) return;
 
-			let headers = toHeaders(name, stats, isEtag);
+			let headers = toHeaders(name, stats, isEtag, getMimeType);
 			if (cc) headers['Cache-Control'] = cc;
 
 			FILES['/' + name.normalize().replace(/\\+/g, '/')] = { abs, stats, headers };
