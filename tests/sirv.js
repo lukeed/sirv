@@ -124,7 +124,7 @@ encode('should work when the request path contains encoded characters :: prod', 
 });
 
 encode(`should work when the request path contains space encoded :: dev`, async () => {
-	let server = utils.http({ dev:  true});
+	let server = utils.http({ dev:  true });
 
 	try {
 		let res = await server.send('GET', '/with%20space.txt');
@@ -137,7 +137,7 @@ encode(`should work when the request path contains space encoded :: dev`, async 
 });
 
 encode(`should work when the request path contains space encoded :: prod`, async () => {
-	let server = utils.http({ dev: false});
+	let server = utils.http({ dev: false });
 
 	try {
 		let res = await server.send('GET', '/with%20space.txt');
