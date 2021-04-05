@@ -78,8 +78,8 @@ module.exports = function (dir, opts) {
 		});
 	}
 
-	opts.port = PORT || opts.port;
-	let hostname = HOST || opts.host || '0.0.0.0';
+	opts.port = opts.port || PORT;
+	let hostname = opts.host || HOST || '0.0.0.0';
 	toPort({ host: hostname, port: opts.port }).then(port => {
 		let isOther = port != opts.port;
 		let https = opts.http2 || !!opts.ssl; // TODO
