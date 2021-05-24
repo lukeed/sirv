@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        nodejs: [10, 12]
+        nodejs: [10, 12, 14]
     steps:
     - uses: actions/checkout@master
       with:
@@ -33,7 +33,7 @@ jobs:
       run: nyc --include=packages pnpm test
 
     - name: Report
-      if: matrix.nodejs >= 12
+      if: matrix.nodejs >= 14
       run: |
         nyc report --reporter=text-lcov > coverage.lcov
         bash <(curl -s https://codecov.io/bash)
