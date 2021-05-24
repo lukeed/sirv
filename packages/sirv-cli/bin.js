@@ -30,4 +30,15 @@ sade('sirv [dir]')
 	.option('-H, --host', 'Hostname to bind', 'localhost')
 	.option('-p, --port', 'Port to bind', 5000)
 	.action(boot)
-	.parse(process.argv);
+	.parse(process.argv, {
+		default: {
+			dev: false,
+			etag: false,
+			quiet: false,
+			dotfiles: false,
+			immutable: false,
+			http2: false,
+			cors: false,
+			logs: true,
+		}
+	});
