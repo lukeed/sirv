@@ -6,7 +6,6 @@
     "url": "https://lukeed.com"
   },
   "scripts": {
-    "pretest": "lerna bootstrap",
     "build": "lerna exec bundt index.js",
     "test": "uvu -r esm tests -i public -i helpers"
   },
