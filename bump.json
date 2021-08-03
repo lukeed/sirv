@@ -1,7 +1,7 @@
 {
   "version": "1.0.12",
-  "npmClient": "pnpm",
   "packages": [
-    "packages/*"
+    "packages/sirv",
+    "packages/sirv-cli"
   ]
 }
