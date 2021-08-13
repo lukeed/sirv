@@ -160,7 +160,7 @@ export default function (dir, opts={}) {
 		if (brots && /(br|brotli)/i.test(val)) extns.unshift(...brots);
 		extns.push(...extensions); // [...br, ...gz, orig, ...exts]
 
-		let pathname = req.path || parse(req, true).pathname;
+		let pathname = !!req._decoded && req.path || parse(req, true).pathname;
 		let data = lookup(pathname, extns) || isSPA && !isMatch(pathname, ignores) && lookup(fallback, extns);
 		if (!data) return next ? next() : isNotFound(req, res);
 
