@@ -1,7 +1,8 @@
 {
-  "version": "1.0.12",
+  "version": "1.0.13",
   "packages": [
     "packages/sirv",
     "packages/sirv-cli"
-  ]
+  ],
+  "message": "v{VERSION}"
 }
