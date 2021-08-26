@@ -1,6 +1,6 @@
 {
   "name": "sirv",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "The optimized & lightweight middleware for serving requests to static assets",
   "repository": "lukeed/sirv",
   "module": "build.mjs",
