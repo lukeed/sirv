@@ -50,7 +50,10 @@ export async function spawn(...argv) {
 	return {
 		address,
 		close() {
-			pid.kill('SIGTERM');
+			return new Promise(res => {
+				pid.on('exit', res);
+				pid.kill('SIGTERM');
+			});
 		},
 		send(method, path, opts) {
 			let uri = new URL(path, address);
