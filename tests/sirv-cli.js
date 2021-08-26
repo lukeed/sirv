@@ -82,7 +82,7 @@ cors('should attach CORS headers to response', async () => {
 		assert.is(res.headers['access-control-allow-origin'], '*');
 		assert.is(res.headers['access-control-allow-headers'], 'Origin, Content-Type, Accept, Range');
 	} finally {
-		server.close();
+		await server.close();
 	}
 });
 
@@ -98,7 +98,7 @@ port('should customize port via flag', async () => {
 		assert.is(server.address.hostname, 'localhost');
 		assert.is(server.address.port, '8080');
 	} finally {
-		server.close();
+		await server.close();
 	}
 });
 
@@ -113,7 +113,7 @@ host('should expose to network via empty host flag', async () => {
 	try {
 		assert.is(server.address.hostname, '0.0.0.0');
 	} finally {
-		server.close();
+		await server.close();
 	}
 });
 
@@ -145,7 +145,7 @@ http2('should start a HTTP/2 server with valid args', async () => {
 	try {
 		assert.is(server.address.protocol, 'https:');
 	} finally {
-		server.close();
+		await server.close();
 	}
 });
 
@@ -160,7 +160,7 @@ http2('should have backward compatibility with HTTP/1', async () => {
 		let res = await server.send('GET', '/blog', { rejectUnauthorized: false });
 		await utils.matches(res, 200, 'blog.html', 'utf8');
 	} finally {
-		server.close();
+		await server.close();
 	}
 });
 
