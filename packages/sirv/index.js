@@ -155,12 +155,17 @@ export default function (dir, opts={}) {
 
 	return function (req, res, next) {
 		let extns = [''];
+		let pathname = parse(req).pathname;
 		let val = req.headers['accept-encoding'] || '';
 		if (gzips && val.includes('gzip')) extns.unshift(...gzips);
 		if (brots && /(br|brotli)/i.test(val)) extns.unshift(...brots);
 		extns.push(...extensions); // [...br, ...gz, orig, ...exts]
 
-		let pathname = typeof req._decoded === 'string' ? req._decoded : parse(req, true).pathname;
+		if (pathname.indexOf('%') !== -1) {
+			try { pathname = decodeURIComponent(pathname) }
+			catch (err) { /* malform uri */ }
+		}
+
 		let data = lookup(pathname, extns) || isSPA && !isMatch(pathname, ignores) && lookup(fallback, extns);
 		if (!data) return next ? next() : isNotFound(req, res);
 
