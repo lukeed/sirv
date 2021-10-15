@@ -733,7 +733,7 @@ brotli('should serve prepared `.br` file of any asset, if found', async () => {
 
 	try {
 		let res1 = await server.send('GET', '/', { headers });
-		assert.is(res1.headers['content-type'], 'text/html');
+		assert.is(res1.headers['content-type'], 'text/html;charset=utf-8');
 		assert.is(res1.headers['content-encoding'], 'br');
 		assert.is(res1.data, 'brotli html\n');
 		assert.is(res1.statusCode, 200);
@@ -751,7 +751,7 @@ brotli('should be preferred when "Accept-Encoding" allows both', async () => {
 
 	try {
 		let res1 = await server.send('GET', '/', { headers });
-		assert.is(res1.headers['content-type'], 'text/html');
+		assert.is(res1.headers['content-type'], 'text/html;charset=utf-8');
 		assert.is(res1.headers['content-encoding'], 'br');
 		assert.is(res1.data, 'brotli html\n');
 		assert.is(res1.statusCode, 200);
@@ -798,7 +798,7 @@ gzip('should serve prepared `.gz` file of any asset, if found', async () => {
 
 	try {
 		let res1 = await server.send('GET', '/', { headers });
-		assert.is(res1.headers['content-type'], 'text/html');
+		assert.is(res1.headers['content-type'], 'text/html;charset=utf-8');
 		assert.is(res1.headers['content-encoding'], 'gzip');
 		assert.is(res1.data, 'gzip html\n');
 		assert.is(res1.statusCode, 200);
@@ -816,7 +816,7 @@ gzip('should defer to brotli when "Accept-Encoding" allows both', async () => {
 
 	try {
 		let res1 = await server.send('GET', '/', { headers });
-		assert.is(res1.headers['content-type'], 'text/html');
+		assert.is(res1.headers['content-type'], 'text/html;charset=utf-8');
 		assert.is(res1.headers['content-encoding'], 'br');
 		assert.is(res1.data, 'brotli html\n');
 		assert.is(res1.statusCode, 200);

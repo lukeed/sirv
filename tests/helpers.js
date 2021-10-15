@@ -76,10 +76,14 @@ export async function lookup(filepath, enc) {
 	let full = join(www, filepath);
 	let stats = await statfile(full);
 	filedata = await readfile(full, enc);
+
+	let ctype = mime.getType(full) || '';
+	if (ctype === 'text/html') ctype += ';charset=utf-8';
+
 	return CACHE[filepath] = {
 		data: filedata,
 		size: stats.size,
-		type: mime.getType(full) || '',
+		type: ctype,
 		mtime: stats.mtime.getTime(),
 	};
 }
