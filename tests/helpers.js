@@ -72,14 +72,18 @@ const CACHE = {};
 export async function lookup(filepath, enc) {
 	let filedata = CACHE[filepath];
 	if (filedata) return filedata;
-
+	
+	let contentType = mime.getType(full) || '';
+	if (contentType === 'text/html') {
+		contentType += '; charset=utf-8';
+	}
 	let full = join(www, filepath);
 	let stats = await statfile(full);
 	filedata = await readfile(full, enc);
 	return CACHE[filepath] = {
 		data: filedata,
 		size: stats.size,
-		type: mime.getType(full) || '',
+		type: contentType,
 		mtime: stats.mtime.getTime(),
 	};
 }
