@@ -78,7 +78,7 @@ export async function lookup(filepath, enc) {
 	filedata = await readfile(full, enc);
 
 	let ctype = mime.getType(full) || '';
-	if (ctype === 'text/html') ctype += '; charset=utf-8';
+	if (ctype === 'text/html') ctype += ';charset=utf-8';
 
 	return CACHE[filepath] = {
 		data: filedata,
