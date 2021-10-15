@@ -88,20 +88,16 @@ function send(req, res, file, stats, headers) {
 	fs.createReadStream(file, opts).pipe(res);
 }
 
-function isEncoding(name, type, headers) {
-	headers['Content-Encoding'] = type;
-	headers['Content-Type'] = mime.getType(name.replace(/\.([^.]*)$/, '')) || '';
-}
-
 function toHeaders(name, stats, isEtag) {
+	let enc = {'.br':'br','.gz':'gzip'}[name.slice(-3)]
+	let type = mime.getType(name.slice(0, enc && -3)) || ''
 	let headers = {
 		'Content-Length': stats.size,
-		'Content-Type': mime.getType(name) || '',
+		'Content-Type': type + (type == 'text/html' ? '; charset=utf-8' : ''),
 		'Last-Modified': stats.mtime.toUTCString(),
 	};
+	if (enc) headers['Content-Encoding'] = enc;
 	if (isEtag) headers['ETag'] = `W/"${stats.size}-${stats.mtime.getTime()}"`;
-	if (/\.br$/.test(name)) isEncoding(name, 'br', headers);
-	if (/\.gz$/.test(name)) isEncoding(name, 'gzip', headers);
 	return headers;
 }
 
