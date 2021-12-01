@@ -8,42 +8,38 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        nodejs: [10, 12]
+        nodejs: [10, 12, 14]
     steps:
-    - uses: actions/checkout@master
-      with:
-        fetch-depth: 1
-
-    - uses: actions/setup-node@v1
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
       with:
         node-version: ${{ matrix.nodejs }}
 
     - name: (env) pnpm
       run: curl -L https://raw.githubusercontent.com/pnpm/self-installer/master/install.js | node
 
-    - name: (lerna) restore
-      uses: actions/cache@master
-      with:
-        path: |
-          node_modules
-          */*/node_modules
-        key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}
-
     - name: Install
-      run: |
-        pnpm install
-        pnpm add -g nyc
+      run: pnpm install
+
+    - name: (coverage) Install
+      if: matrix.nodejs >= 14
+      run: pnpm add -g c8
 
     - name: Build
       run: pnpm run build
 
-    - name: Test w/ Coverage
-      run: nyc --include=packages pnpm test
+    - name: Test
+      if: matrix.nodejs < 14
+      run: pnpm test
 
-    - name: Report
-      if: matrix.nodejs >= 12
+    - name: (coverage) Test
+      if: matrix.nodejs >= 14
+      run: c8 --include=packages pnpm test
+
+    - name: (coverage) Report
+      if: matrix.nodejs >= 14
       run: |
-        nyc report --reporter=text-lcov > coverage.lcov
+        c8 report --reporter=text-lcov > coverage.lcov
         bash <(curl -s https://codecov.io/bash)
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import { join, normalize, resolve } from 'path';
-import {totalist } from 'totalist/sync';
-import parser from '@polka/url';
-import mime from 'mime/lite';
+import { totalist } from 'totalist/sync';
+import { parse } from '@polka/url';
+import { lookup } from 'mrmime';
 
 const noop = () => {};
 
@@ -44,7 +44,7 @@ function viaLocal(dir, isEtag, uri, extns) {
 			stats = fs.statSync(abs);
 			if (stats.isDirectory()) continue;
 			headers = toHeaders(name, stats, isEtag);
-			headers['Cache-Control'] = 'no-store';
+			headers['Cache-Control'] = isEtag ? 'no-cache' : 'no-store';
 			return { abs, stats, headers };
 		}
 	}
@@ -88,20 +88,26 @@ function send(req, res, file, stats, headers) {
 	fs.createReadStream(file, opts).pipe(res);
 }
 
-function isEncoding(name, type, headers) {
-	headers['Content-Encoding'] = type;
-	headers['Content-Type'] = mime.getType(name.replace(/\.([^.]*)$/, '')) || '';
-}
+const ENCODING = {
+	'.br': 'br',
+	'.gz': 'gzip',
+};
 
 function toHeaders(name, stats, isEtag) {
+	let enc = ENCODING[name.slice(-3)];
+
+	let ctype = lookup(name.slice(0, enc && -3)) || '';
+	if (ctype === 'text/html') ctype += ';charset=utf-8';
+
 	let headers = {
 		'Content-Length': stats.size,
-		'Content-Type': mime.getType(name) || '',
+		'Content-Type': ctype,
 		'Last-Modified': stats.mtime.toUTCString(),
 	};
+
+	if (enc) headers['Content-Encoding'] = enc;
 	if (isEtag) headers['ETag'] = `W/"${stats.size}-${stats.mtime.getTime()}"`;
-	if (/\.br$/.test(name)) isEncoding(name, 'br', headers);
-	if (/\.gz$/.test(name)) isEncoding(name, 'gzip', headers);
+
 	return headers;
 }
 
@@ -127,7 +133,7 @@ export default function (dir, opts={}) {
 
 	let ignores = [];
 	if (opts.ignores !== false) {
-		ignores.push(/\w\.\w+$/); // any extn
+		ignores.push(/[/]([A-Za-z\s\d~$._-]+\.\w+){1,}$/); // any extn
 		if (opts.dotfiles) ignores.push(/\/\.\w/);
 		else ignores.push(/\/\.well-known/);
 		[].concat(opts.ignores || []).forEach(x => {
@@ -155,18 +161,27 @@ export default function (dir, opts={}) {
 
 	return function (req, res, next) {
 		let extns = [''];
+		let pathname = parse(req).pathname;
 		let val = req.headers['accept-encoding'] || '';
 		if (gzips && val.includes('gzip')) extns.unshift(...gzips);
 		if (brots && /(br|brotli)/i.test(val)) extns.unshift(...brots);
 		extns.push(...extensions); // [...br, ...gz, orig, ...exts]
 
-		let pathname = req.path || parser(req, true).pathname;
+		if (pathname.indexOf('%') !== -1) {
+			try { pathname = decodeURIComponent(pathname) }
+			catch (err) { /* malform uri */ }
+		}
+
 		let data = lookup(pathname, extns) || isSPA && !isMatch(pathname, ignores) && lookup(fallback, extns);
 		if (!data) return next ? next() : isNotFound(req, res);
 
 		if (isEtag && req.headers['if-none-match'] === data.headers['ETag']) {
 			res.writeHead(304);
 			return res.end();
+		}
+
+		if (gzips || brots) {
+			res.setHeader('Vary', 'Accept-Encoding');
 		}
 
 		setHeaders(res, pathname, data.stats);

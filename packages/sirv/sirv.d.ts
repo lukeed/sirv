@@ -3,7 +3,7 @@ declare module 'sirv' {
 	import type { IncomingMessage, ServerResponse } from 'http';
 
 	type Arrayable<T> = T | T[];
-	export type NextHandler = VoidFunction | Promise<void>;
+	export type NextHandler = () => void | Promise<void>;
 	export type RequestHandler = (req: IncomingMessage, res: ServerResponse, next?: NextHandler) => void;
 
 	export interface Options {

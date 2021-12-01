@@ -1,0 +1,8 @@
+{
+  "version": "1.0.19",
+  "packages": [
+    "packages/sirv",
+    "packages/sirv-cli"
+  ],
+  "message": "v{VERSION}"
+}

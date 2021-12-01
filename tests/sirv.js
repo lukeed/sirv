@@ -123,6 +123,32 @@ encode('should work when the request path contains encoded characters :: prod', 
 	}
 });
 
+encode(`should work when the request path contains space encoded :: dev`, async () => {
+	let server = utils.http({ dev:  true });
+
+	try {
+		let res = await server.send('GET', '/with%20space.txt');
+		assert.is(res.headers['content-type'], 'text/plain');
+		assert.is(res.data, 'with space.txt\n');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+encode(`should work when the request path contains space encoded :: prod`, async () => {
+	let server = utils.http({ dev: false });
+
+	try {
+		let res = await server.send('GET', '/with%20space.txt');
+		assert.is(res.headers['content-type'], 'text/plain');
+		assert.is(res.data, 'with space.txt\n');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
 encode.run();
 
 // ---
@@ -602,6 +628,17 @@ dev('should not rely on file cached data', async () => {
 	}
 });
 
+dev('should set default `Cache-Control` header value', async () => {
+	let server = utils.http({ dev: true });
+
+	try {
+		let res1 = await server.send('GET', '/bundle.67329.js');
+		assert.is(res1.headers['cache-control'], 'no-store');
+	} finally {
+		server.close();
+	}
+});
+
 dev.run();
 
 // ---
@@ -648,6 +685,22 @@ etag('should allow "If-None-Match" directive to function', async () => {
 	}
 });
 
+etag('should force `Cache-Control` header in `dev` mode', async () => {
+	let server = utils.http({ etag: true, dev: true });
+
+	try {
+		let res1 = await server.send('GET', '/bundle.67329.js');
+		assert.is(res1.headers['cache-control'], 'no-cache');
+
+		let headers = { 'If-None-Match': res1.headers['etag'] };
+		let res2 = await server.send('GET', '/bundle.67329.js', { headers });
+		assert.is(res2.statusCode, 304, 'send 304 for "no change" signal');
+		assert.is(res2.data, '', 'send empty response body');
+	} finally {
+		server.close();
+	}
+});
+
 etag.run();
 
 // ---
@@ -680,7 +733,7 @@ brotli('should serve prepared `.br` file of any asset, if found', async () => {
 
 	try {
 		let res1 = await server.send('GET', '/', { headers });
-		assert.is(res1.headers['content-type'], 'text/html');
+		assert.is(res1.headers['content-type'], 'text/html;charset=utf-8');
 		assert.is(res1.headers['content-encoding'], 'br');
 		assert.is(res1.data, 'brotli html\n');
 		assert.is(res1.statusCode, 200);
@@ -698,7 +751,7 @@ brotli('should be preferred when "Accept-Encoding" allows both', async () => {
 
 	try {
 		let res1 = await server.send('GET', '/', { headers });
-		assert.is(res1.headers['content-type'], 'text/html');
+		assert.is(res1.headers['content-type'], 'text/html;charset=utf-8');
 		assert.is(res1.headers['content-encoding'], 'br');
 		assert.is(res1.data, 'brotli html\n');
 		assert.is(res1.statusCode, 200);
@@ -745,7 +798,7 @@ gzip('should serve prepared `.gz` file of any asset, if found', async () => {
 
 	try {
 		let res1 = await server.send('GET', '/', { headers });
-		assert.is(res1.headers['content-type'], 'text/html');
+		assert.is(res1.headers['content-type'], 'text/html;charset=utf-8');
 		assert.is(res1.headers['content-encoding'], 'gzip');
 		assert.is(res1.data, 'gzip html\n');
 		assert.is(res1.statusCode, 200);
@@ -763,7 +816,7 @@ gzip('should defer to brotli when "Accept-Encoding" allows both', async () => {
 
 	try {
 		let res1 = await server.send('GET', '/', { headers });
-		assert.is(res1.headers['content-type'], 'text/html');
+		assert.is(res1.headers['content-type'], 'text/html;charset=utf-8');
 		assert.is(res1.headers['content-encoding'], 'br');
 		assert.is(res1.data, 'brotli html\n');
 		assert.is(res1.statusCode, 200);

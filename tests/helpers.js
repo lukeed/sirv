@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { join } from 'path';
-import mime from 'mime/lite';
 import { send } from 'httpie';
+import * as mime from 'mrmime';
 import { promisify } from 'util';
 import { createServer } from 'http';
 import * as child from 'child_process';
@@ -34,29 +34,32 @@ export function exec(...argv) {
 	return child.spawnSync('node', [BIN, www, ...argv]);
 }
 
-export async function spawn(...argv) {
-	let address;
-	let pid = child.execFile('node', [BIN, www, ...argv]);
+export function spawn(...argv) {
+	return new Promise(r => {
+		let address, output='';
+		let pid = child.execFile('node', [BIN, www, ...argv]);
 
-	for await (let buf of pid.stdout) {
-		let str = buf.toString();
-		if (/Local\:/.test(str)) {
-			address = new URL(str.match(/https?:\/\/.*/)[0]);
-			console.log(str); // WTF why have to log to pass???
-			break;
-		}
-	}
+		pid.stdout.on('data', x => {
+			output += x.toString();
 
-	return {
-		address,
-		close() {
-			pid.kill('SIGTERM');
-		},
-		send(method, path, opts) {
-			let uri = new URL(path, address);
-			return send(method, uri, opts);
-		}
-	};
+			if (/Local\:/.test(output)) {
+				let addr = new URL(output.match(/https?:\/\/.*/)[0]);
+				return r({
+					address: addr,
+					close() {
+						return new Promise(res => {
+							pid.on('exit', res);
+							pid.kill('SIGTERM');
+						});
+					},
+					send(method, path, opts) {
+						let uri = new URL(path, addr);
+						return send(method, uri, opts);
+					}
+				});
+			}
+		});
+	});
 }
 
 export function listen(server) {
@@ -73,10 +76,14 @@ export async function lookup(filepath, enc) {
 	let full = join(www, filepath);
 	let stats = await statfile(full);
 	filedata = await readfile(full, enc);
+
+	let ctype = mime.lookup(full) || '';
+	if (ctype === 'text/html') ctype += ';charset=utf-8';
+
 	return CACHE[filepath] = {
 		data: filedata,
 		size: stats.size,
-		type: mime.getType(full) || '',
+		type: ctype,
 		mtime: stats.mtime.getTime(),
 	};
 }
