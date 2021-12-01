@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { join, normalize, resolve } from 'path';
-import { totalist } from 'totalist/sync';
+import {totalist } from 'totalist/sync';
 import parser from '@polka/url';
 import mime from 'mime/lite';
 
