@@ -643,6 +643,62 @@ dev.run();
 
 // ---
 
+const casing = suite('casing');
+
+casing('should lowercase file names :: local', async () => {
+	let server = utils.http({ dev: true });
+
+	try {
+		let res1 = await server.send('GET', '/UPPER.txt');
+		assert.is(res1.data, 'UPPER\n');
+
+		let res2 = await server.send('GET', '/upper.txt');
+		assert.is(res2.data, 'UPPER\n');
+	} finally {
+		server.close();
+	}
+});
+
+casing('should lowercase file names :: cache', async () => {
+	let server = utils.http({ dev: false });
+
+	try {
+		let res1 = await server.send('GET', '/UPPER.txt');
+		assert.is(res1.data, 'UPPER\n');
+
+		let res2 = await server.send('GET', '/upper.txt');
+		assert.is(res2.data, 'UPPER\n');
+	} finally {
+		server.close();
+	}
+});
+
+casing('should lowercase pathnames :: local', async () => {
+	let server = utils.http({ dev: true });
+
+	try {
+		let res = await server.send('GET', '/TEST.SVG');
+		assert.ok(res.data.startsWith('<svg xmlns='));
+	} finally {
+		server.close();
+	}
+});
+
+casing('should lowercase pathnames :: cache', async () => {
+	let server = utils.http({ dev: false });
+
+	try {
+		let res = await server.send('GET', '/TEST.SVG');
+		assert.ok(res.data.startsWith('<svg xmlns='));
+	} finally {
+		server.close();
+	}
+});
+
+casing.run();
+
+// ---
+
 const etag = suite('etag');
 
 etag('should include an "ETag" HTTP header value', async () => {

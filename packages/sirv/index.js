@@ -153,7 +153,7 @@ export default function (dir, opts={}) {
 			let headers = toHeaders(name, stats, isEtag);
 			if (cc) headers['Cache-Control'] = cc;
 
-			FILES['/' + name.normalize().replace(/\\+/g, '/')] = { abs, stats, headers };
+			FILES['/' + name.normalize().toLowerCase().replace(/\\+/g, '/')] = { abs, stats, headers };
 		});
 	}
 
@@ -172,6 +172,7 @@ export default function (dir, opts={}) {
 			catch (err) { /* malform uri */ }
 		}
 
+		pathname = pathname.toLowerCase();
 		let data = lookup(pathname, extns) || isSPA && !isMatch(pathname, ignores) && lookup(fallback, extns);
 		if (!data) return next ? next() : isNotFound(req, res);
 
