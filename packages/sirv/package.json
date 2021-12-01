@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@polka/url": "^1.0.0-next.20",
-    "mime": "^2.3.1",
+    "mrmime": "^1.0.0",
     "totalist": "^1.0.0"
   }
 }

@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { join, normalize, resolve } from 'path';
 import { parse } from '@polka/url';
 import list from 'totalist/sync';
-import mime from 'mime/lite';
+import { lookup } from 'mrmime';
 
 const noop = () => {};
 
@@ -96,7 +96,7 @@ const ENCODING = {
 function toHeaders(name, stats, isEtag) {
 	let enc = ENCODING[name.slice(-3)];
 
-	let ctype = mime.getType(name.slice(0, enc && -3)) || '';
+	let ctype = lookup(name.slice(0, enc && -3)) || '';
 	if (ctype === 'text/html') ctype += ';charset=utf-8';
 
 	let headers = {

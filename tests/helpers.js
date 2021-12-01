@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { join } from 'path';
-import mime from 'mime/lite';
 import { send } from 'httpie';
+import * as mime from 'mrmime';
 import { promisify } from 'util';
 import { createServer } from 'http';
 import * as child from 'child_process';
@@ -77,7 +77,7 @@ export async function lookup(filepath, enc) {
 	let stats = await statfile(full);
 	filedata = await readfile(full, enc);
 
-	let ctype = mime.getType(full) || '';
+	let ctype = mime.lookup(full) || '';
 	if (ctype === 'text/html') ctype += ';charset=utf-8';
 
 	return CACHE[filepath] = {
