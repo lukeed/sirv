@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { join, normalize, resolve } from 'path';
+import { totalist } from 'totalist/sync';
 import { parse } from '@polka/url';
-import list from 'totalist/sync';
 import { lookup } from 'mrmime';
 
 const noop = () => {};
@@ -146,7 +146,7 @@ export default function (dir, opts={}) {
 	else if (cc && opts.maxAge === 0) cc += ',must-revalidate';
 
 	if (!opts.dev) {
-		list(dir, (name, abs, stats) => {
+		totalist(dir, (name, abs, stats) => {
 			if (/\.well-known[\\+\/]/.test(name)) {} // keep
 			else if (!opts.dotfiles && /(^\.|[\\+|\/+]\.)/.test(name)) return;
 
