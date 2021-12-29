@@ -14,15 +14,21 @@
 
 ## Benchmarks
 
-> Running the [`/bench`](/bench) directory with Node.js v10.13.0
-
 All results are taken with the following command:
 
 ```sh
-$ wrk -t8 -c100 -d10s http://localhost:3000/
+$ wrk -t8 -c100 -d10s http://localhost:$PORT/
+#=> wrk -t8 -c100 -d10s http://localhost:8080
 ```
 
 > **Note:** Expand each section to view results :thinking:
+
+
+### Programmatic
+
+> Running the [`/bench`](/bench) directory with Node.js v10.13.0
+
+Compares `sirv` against `serve-static`, both of which require programmatic usage for use within existing Node servers.
 
 <details>
 <summary><strong>GET "/" (200)</strong></summary>
@@ -123,6 +129,83 @@ sirv (dev: true)
   Non-2xx or 3xx responses: 39989
 Requests/sec:   3982.45
 Transfer/sec:    412.25KB
+```
+</details>
+
+### CLI
+
+> Each command was run independently on Node 16.13.0
+
+Compares `sirv-cli` against `http-server`, both of which are standalone CLI utilities.
+
+<details>
+<summary><strong>GET "/" (200)</strong></summary>
+
+```
+http-server :: Cache = YES
+  $ http-server tests/public
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    18.32ms    4.08ms  69.85ms   89.77%
+    Req/Sec   659.44     93.04   767.00     90.62%
+  52614 requests in 10.03s, 29.30MB read
+Requests/sec:   5247.35
+Transfer/sec:      2.92MB
+
+
+http-server :: Cache = NO
+  $ http-server tests/public -c-1
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    18.89ms    4.58ms  73.49ms   89.99%
+    Req/Sec   639.83    105.69   727.00     89.00%
+  51052 requests in 10.03s, 29.55MB read
+Requests/sec:   5091.65
+Transfer/sec:      2.95MB
+
+
+sirv-cli :: Cache = YES
+  $ sirv tests/public
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     8.19ms    6.18ms 106.92ms   95.99%
+    Req/Sec     1.59k   300.50     1.82k    89.75%
+  126322 requests in 10.02s, 60.72MB read
+Requests/sec:  12612.53
+Transfer/sec:      6.06MB
+
+
+sirv-cli :: Cache = NO
+  $ sirv tests/public --dev
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    11.32ms    1.99ms  54.04ms   94.70%
+    Req/Sec     1.07k   122.82     1.21k    90.00%
+  85069 requests in 10.02s, 42.92MB read
+Requests/sec:   8490.92
+Transfer/sec:      4.28MB
+
+
+sirv-cli :: Cache = YES :: Logs = NO
+  $ sirv tests/public --no-logs
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     7.05ms    1.78ms  33.87ms   94.72%
+    Req/Sec     1.72k   295.83     6.89k    93.38%
+  137539 requests in 10.11s, 66.11MB read
+Requests/sec:  13609.61
+Transfer/sec:      6.54MB
+
+
+sirv-cli :: Cache = NO :: Logs = NO
+  $ sirv tests/public --no-logs --dev
+---
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     9.49ms    2.10ms  44.24ms   94.50%
+    Req/Sec     1.28k   175.71     1.45k    87.88%
+  101753 requests in 10.02s, 51.33MB read
+Requests/sec:  10157.38
+Transfer/sec:      5.12MB
 ```
 </details>
 
