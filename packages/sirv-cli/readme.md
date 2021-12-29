@@ -61,16 +61,16 @@ $ sirv --help
     -I, --ignores      Any URL pattern(s) to ignore "index.html" assumptions
     -q, --quiet        Disable logging to terminal
     -H, --host         Hostname to bind  (default localhost)
-    -p, --port         Port to bind  (default 5000)
+    -p, --port         Port to bind  (default 8080)
     -v, --version      Displays current version
     -h, --help         Displays this message
 
   Examples
-    $ sirv build --cors --port 8080
+    $ sirv build --cors --port 8888
     $ sirv public --quiet --etag --maxage 31536000 --immutable
     $ sirv public --http2 --key priv.pem --cert cert.pem
     $ sirv public -qeim 31536000
-    $ sirv --port 8080 --etag
+    $ sirv --port 8888 --etag
     $ sirv --host --dev
 
 ```
