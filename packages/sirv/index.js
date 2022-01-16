@@ -160,6 +160,11 @@ export default function (dir, opts={}) {
 	let lookup = opts.dev ? viaLocal.bind(0, dir, isEtag) : viaCache.bind(0, FILES);
 
 	return function (req, res, next) {
+		// only handle GET requests
+		if (req.method !== 'GET') {
+			return next ? next() : isNotFound(req, res);
+		}
+
 		let extns = [''];
 		let pathname = parse(req).pathname;
 		let val = req.headers['accept-encoding'] || '';

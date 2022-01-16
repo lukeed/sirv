@@ -31,6 +31,20 @@ types.run();
 
 const basic = suite('basics');
 
+basic('should only handle GET requests', async () => {
+	let server = utils.http();
+
+	try {
+		let res = await server.send('POST', '/contact').catch(err => {
+			assert.is(err.statusCode, 404);
+		})
+		assert.is(res, undefined)
+	}
+	finally {
+		server.close();
+	}
+})
+
 basic('should return the file if found', async () => {
 	let server = utils.http();
 
