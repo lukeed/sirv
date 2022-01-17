@@ -4,11 +4,12 @@ on: [push, pull_request]
 
 jobs:
   test:
-    name: Node.js v${{ matrix.nodejs }}
-    runs-on: ubuntu-latest
+    name: Node.js v${{ matrix.nodejs }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         nodejs: [10, 12, 14, 16]
+        os: [ubuntu-latest, windows-latest]
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
