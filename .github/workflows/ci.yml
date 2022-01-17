@@ -17,7 +17,12 @@ jobs:
         node-version: ${{ matrix.nodejs }}
 
     - name: (env) pnpm
-      run: npm install -g pnpm
+      if: matrix.os == 'ubuntu-latest'
+      run: curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm
+
+    - name: (env) pnpm
+      if: matrix.os == 'windows-latest'
+      run: Invoke-WebRequest 'https://get.pnpm.io/v6.16.js' -UseBasicParsing -o pnpm.js; node pnpm.js add --global pnpm; Remove-Item pnpm.js
 
     - name: Install
       run: pnpm install
