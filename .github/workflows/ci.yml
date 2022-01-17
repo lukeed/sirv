@@ -4,12 +4,11 @@ on: [push, pull_request]
 
 jobs:
   test:
-    name: Node.js v${{ matrix.nodejs }} (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
+    name: Node.js v${{ matrix.nodejs }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         nodejs: [10, 12, 14, 16]
-        os: [ubuntu-latest, windows-latest]
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
@@ -17,28 +16,28 @@ jobs:
         node-version: ${{ matrix.nodejs }}
 
     - name: (env) pnpm
-      run: npm i -g pnpm@5.18
+      run: curl -L https://raw.githubusercontent.com/pnpm/self-installer/master/install.js | node
 
     - name: Install
       run: pnpm install
 
     - name: (coverage) Install
-      if: matrix.nodejs >= 16 && matrix.os == 'ubuntu-latest'
+      if: matrix.nodejs >= 16
       run: pnpm add -g c8
 
     - name: Build
       run: pnpm run build
 
     - name: Test
-      if: matrix.nodejs < 16 || matrix.os != 'ubuntu-latest'
+      if: matrix.nodejs < 16
       run: pnpm test
 
     - name: (coverage) Test
-      if: matrix.nodejs >= 16 && matrix.os == 'ubuntu-latest'
+      if: matrix.nodejs >= 16
       run: c8 --include=packages pnpm test
 
     - name: (coverage) Report
-      if: matrix.nodejs >= 16 && matrix.os == 'ubuntu-latest'
+      if: matrix.nodejs >= 16
       run: |
         c8 report --reporter=text-lcov > coverage.lcov
         bash <(curl -s https://codecov.io/bash)
