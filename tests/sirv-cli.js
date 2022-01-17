@@ -8,10 +8,9 @@ const help = suite('help');
 help('--help', () => {
 	let pid = utils.exec('--help');
 	assert.is(pid.status, 0);
-
 	assert.snapshot(
-		// compare output contents, excluding whitespace
-		pid.stdout.toString().replace(/\s/g, ''),
+		// compare output contents, normalize
+		pid.stdout.toString().trimRight(),
 		`
       Description
         Run a static file server
@@ -47,7 +46,7 @@ help('--help', () => {
         $ sirv public -qeim 31536000
         $ sirv --port 8888 --etag
         $ sirv --host --dev
-    `.replace(/\s/g, '')
+    `.trimRight()
 	);
 });
 
