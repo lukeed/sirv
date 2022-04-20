@@ -6,7 +6,7 @@ const pkg = require('./package');
 sade('sirv [dir]')
 	.version(pkg.version)
 	.describe('Run a static file server')
-		.example('build --cors --port 8888')
+		.example('build --cors --csp "default-src example.com" --port 8888')
 		.example('public --quiet --etag --maxage 31536000 --immutable')
 		.example('public --http2 --key priv.pem --cert cert.pem')
 		.example('public -qeim 31536000')
@@ -15,6 +15,7 @@ sade('sirv [dir]')
 	.option('-D, --dev', 'Enable "dev" mode')
 	.option('-e, --etag', 'Enable "ETag" header')
 	.option('-d, --dotfiles', 'Enable dotfile asset requests')
+	.option('-C, --csp', 'Set Content-Security-Policy headers')
 	.option('-c, --cors', 'Enable "CORS" headers to allow any origin requestor')
 	.option('-G, --gzip', 'Send precompiled "*.gz" files when "gzip" is supported', true)
 	.option('-B, --brotli', 'Send precompiled "*.br" files when "brotli" is supported', true)
@@ -39,6 +40,7 @@ sade('sirv [dir]')
 			immutable: false,
 			http2: false,
 			cors: false,
+			csp: false,
 			logs: true,
 		}
 	});
