@@ -106,7 +106,7 @@ function toHeaders(name, stats, isEtag) {
 	};
 
 	if (enc) headers['Content-Encoding'] = enc;
-	if (isEtag) headers['ETag'] = `W/"${stats.size}-${stats.mtime.getTime()}"`;
+	if (isEtag) headers['ETag'] = `W/"${stats.size.toString(16)}-${stats.mtime.getTime().toString(16)}"`;
 
 	return headers;
 }
