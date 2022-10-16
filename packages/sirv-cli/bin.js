@@ -16,6 +16,7 @@ sade('sirv [dir]')
 	.option('-e, --etag', 'Enable "ETag" header')
 	.option('-d, --dotfiles', 'Enable dotfile asset requests')
 	.option('-c, --cors', 'Enable "CORS" headers to allow any origin requestor')
+	.option('-CP --corp', 'Enable "CORP" headers, set to same-orgin')
 	.option('-G, --gzip', 'Send precompiled "*.gz" files when "gzip" is supported', true)
 	.option('-B, --brotli', 'Send precompiled "*.br" files when "brotli" is supported', true)
 	.option('-m, --maxage', 'Enable "Cache-Control" header & define its "max-age" value (sec)')
@@ -39,6 +40,7 @@ sade('sirv [dir]')
 			immutable: false,
 			http2: false,
 			cors: false,
+			corp: false,
 			logs: true,
 		}
 	});
