@@ -73,7 +73,11 @@ function send(req, res, file, stats, headers) {
 		let end = opts.end = parseInt(y, 10) || stats.size - 1;
 		let start = opts.start = parseInt(x, 10) || 0;
 
-		if (start >= stats.size || end >= stats.size) {
+		if (end >= stats.size) {
+			end = stats.size - 1;
+		}
+
+		if (start >= stats.size) {
 			res.setHeader('Content-Range', `bytes */${stats.size}`);
 			res.statusCode = 416;
 			return res.end();
