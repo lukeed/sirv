@@ -168,7 +168,7 @@ export default function (dir, opts={}) {
 		extns.push(...extensions); // [...br, ...gz, orig, ...exts]
 
 		if (pathname.indexOf('%') !== -1) {
-			try { pathname = decodeURIComponent(pathname) }
+			try { pathname = decodeURI(pathname) }
 			catch (err) { /* malform uri */ }
 		}
 
