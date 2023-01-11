@@ -3,9 +3,13 @@
   "version": "2.0.2",
   "description": "The optimized & lightweight middleware for serving requests to static assets",
   "repository": "lukeed/sirv",
-  "module": "build.mjs",
-  "types": "sirv.d.ts",
-  "main": "build.js",
+  "exports": {
+    ".": {
+      "types": "./sirv.d.ts",
+      "import": "./build.mjs",
+      "require": "./build.js"
+    }
+  },
   "license": "MIT",
   "files": [
     "build.*",
