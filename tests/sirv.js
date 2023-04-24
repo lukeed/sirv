@@ -1038,10 +1038,9 @@ ranges('should shrink range end if it cannot be met (overflow)', async () => {
 	try {
 		let headers = { Range: 'bytes=10-123456' };
 		let file = await utils.lookup('bundle.67329.js', 'utf8');
-		await server.send('GET', '/bundle.67329.js', { headers }).then(res => {
-			assert.is(res.headers['content-range'], `bytes 10-${file.size - 1}/${file.size}`);
-			assert.is(res.statusCode, 206);
-		});
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+		assert.is(res.headers['content-range'], `bytes 10-${file.size - 1}/${file.size}`);
+		assert.is(res.statusCode, 206);
 	} finally {
 		server.close();
 	}
