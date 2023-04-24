@@ -1017,16 +1017,30 @@ ranges('should assume the end-value is final byte when not included :: full', as
 	}
 });
 
-ranges('should throw `416` when range cannot be met (overflow)', async () => {
+ranges('should throw `416` when range start cannot be met (overflow)', async () => {
 	let server = utils.http();
 
 	try {
-		let headers = { Range: 'bytes=0-123456' };
+		let headers = { Range: 'bytes=123456-234567' };
 		let file = await utils.lookup('bundle.67329.js', 'utf8');
 		await server.send('GET', '/bundle.67329.js', { headers }).catch(err => {
 			assert.is(err.headers['content-range'], `bytes */${file.size}`);
 			assert.is(err.statusCode, 416);
 		});
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should shrink range end if it cannot be met (overflow)', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=10-123456' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+		assert.is(res.headers['content-range'], `bytes 10-${file.size - 1}/${file.size}`);
+		assert.is(res.statusCode, 206);
 	} finally {
 		server.close();
 	}
