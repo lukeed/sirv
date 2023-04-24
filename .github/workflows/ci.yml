@@ -11,14 +11,13 @@ jobs:
         nodejs: [10, 12, 14, 16, 18]
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.nodejs }}
     - uses: pnpm/action-setup@v2.2.4
       with:
         version: 7.13.5
         run_install: false
-    - uses: actions/setup-node@v3
-      with:
-        cache: 'pnpm'
-        node-version: ${{ matrix.nodejs }}
 
     - name: Install
       run: pnpm install
