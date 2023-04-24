@@ -123,7 +123,7 @@ encode('should work when the request path contains encoded characters :: prod', 
 	}
 });
 
-encode(`should work when the request path contains space encoded :: dev`, async () => {
+encode('should work when the request path contains space encoded :: dev', async () => {
 	let server = utils.http({ dev:  true });
 
 	try {
@@ -136,7 +136,7 @@ encode(`should work when the request path contains space encoded :: dev`, async 
 	}
 });
 
-encode(`should work when the request path contains space encoded :: prod`, async () => {
+encode('should work when the request path contains space encoded :: prod', async () => {
 	let server = utils.http({ dev: false });
 
 	try {
@@ -144,6 +144,34 @@ encode(`should work when the request path contains space encoded :: prod`, async
 		assert.is(res.headers['content-type'], 'text/plain');
 		assert.is(res.data, 'with space.txt\n');
 		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+encode('should not treat "/foo%2Fbar.txt" the same as "/foo.bar.txt" path :: dev', async () => {
+	let server = utils.http({ dev: true });
+
+	try {
+		let res1 = await server.send('GET', '/about/index.htm');
+		assert.is(res1.statusCode, 200);
+
+		let res2 = await server.send('GET', '/about%2Findex.htm').catch(r => r);
+		assert.is(res2.statusCode, 404);
+	} finally {
+		server.close();
+	}
+});
+
+encode('should not treat "/foo%2Fbar.txt" the same as "/foo.bar.txt" path :: prod', async () => {
+	let server = utils.http({ dev: false });
+
+	try {
+		let res1 = await server.send('GET', '/about/index.htm');
+		assert.is(res1.statusCode, 200);
+
+		let res2 = await server.send('GET', '/about%2Findex.htm').catch(r => r);
+		assert.is(res2.statusCode, 404);
 	} finally {
 		server.close();
 	}
