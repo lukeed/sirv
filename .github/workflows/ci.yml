@@ -16,7 +16,6 @@ jobs:
         node-version: ${{ matrix.nodejs }}
     - uses: pnpm/action-setup@v2.2.4
       with:
-        version: 7.13.5
         run_install: false
 
     - name: Install
