@@ -623,7 +623,7 @@ dev('should not rely on initial Cache fill', async () => {
 
 		// matches() helper will work but assert here
 		let res = await server.send('GET', '/foo.bar.js');
-		assert.is(res.headers['content-type'], 'application/javascript');
+		assert.is(res.headers['content-type'], 'text/javascript');
 		assert.is(res.headers['content-length'], '11');
 		assert.is(res.data, 'hello there');
 		assert.is(res.statusCode, 200);
@@ -746,7 +746,7 @@ brotli('should require "Accept-Encoding" match to do anything', async () => {
 
 		// the `matches` helper assumes wrong mime type
 		let res = await server.send('GET', '/data.js', { headers });
-		assert.is(res.headers['content-type'], 'application/javascript');
+		assert.is(res.headers['content-type'], 'text/javascript');
 		assert.is(res.headers['content-encoding'], 'br');
 		assert.is(res.data, 'brotli js file\n');
 		assert.is(res.statusCode, 200);
@@ -785,7 +785,7 @@ brotli('should be preferred when "Accept-Encoding" allows both', async () => {
 		assert.is(res1.statusCode, 200);
 
 		let res2 = await server.send('GET', '/data.js', { headers });
-		assert.is(res2.headers['content-type'], 'application/javascript');
+		assert.is(res2.headers['content-type'], 'text/javascript');
 		assert.is(res2.headers['content-encoding'], 'br');
 		assert.is(res2.data, 'brotli js file\n');
 		assert.is(res2.statusCode, 200);
@@ -811,7 +811,7 @@ gzip('should require "Accept-Encoding" match to do anything', async () => {
 
 		// the `matches` helper assumes wrong mime type
 		let res = await server.send('GET', '/data.js', { headers });
-		assert.is(res.headers['content-type'], 'application/javascript');
+		assert.is(res.headers['content-type'], 'text/javascript');
 		assert.is(res.headers['content-encoding'], 'gzip');
 		assert.is(res.data, 'gzip js file\n');
 		assert.is(res.statusCode, 200);
@@ -850,7 +850,7 @@ gzip('should defer to brotli when "Accept-Encoding" allows both', async () => {
 		assert.is(res1.statusCode, 200);
 
 		let res2 = await server.send('GET', '/data.js', { headers });
-		assert.is(res2.headers['content-type'], 'application/javascript');
+		assert.is(res2.headers['content-type'], 'text/javascript');
 		assert.is(res2.headers['content-encoding'], 'br');
 		assert.is(res2.data, 'brotli js file\n');
 		assert.is(res2.statusCode, 200);
