@@ -11,11 +11,11 @@
   },
   "devDependencies": {
     "bump": "1.0.0-next.1",
-    "bundt": "1.0.1",
+    "bundt": "1.1.5",
     "esm": "3.2.25",
-    "httpie": "2.0.0-next.7",
-    "mrmime": "1.0.0",
-    "selfsigned": "1.10.7",
+    "httpie": "2.0.0-next.13",
+    "mrmime": "2.0.0",
+    "selfsigned": "2.4.1",
     "uvu": "0.5.2"
   }
 }
