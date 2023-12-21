@@ -22,6 +22,7 @@ help('--help', () => {
         -D, --dev          Enable "dev" mode
         -e, --etag         Enable "ETag" header
         -d, --dotfiles     Enable dotfile asset requests
+		-C, --csp		   Enable Content-Security-Policy headers
         -c, --cors         Enable "CORS" headers to allow any origin requestor
         -G, --gzip         Send precompiled "*.gz" files when "gzip" is supported  (default true)
         -B, --brotli       Send precompiled "*.br" files when "brotli" is supported  (default true)
@@ -40,7 +41,7 @@ help('--help', () => {
         -h, --help         Displays this message
 
       Examples
-        $ sirv build --cors --port 8888
+        $ sirv build --cors --csp "default-src example.com" --port 8888
         $ sirv public --quiet --etag --maxage 31536000 --immutable
         $ sirv public --http2 --key priv.pem --cert cert.pem
         $ sirv public -qeim 31536000
@@ -68,6 +69,26 @@ basic('should start a server', async () => {
 });
 
 basic.run();
+
+// ---
+
+const csp = suite('csp');
+
+csp('should attach CSP headers to response', async () => {
+	let server = await utils.spawn('--csp "default-src example.com"');
+
+	try {
+		let res = await server.send('GET', '/blog');
+		await utils.matches(res, 200, 'blog.html', 'utf8');
+		assert.is(res.headers['Content-Security-Policy'], 'default-src example.com');
+	} finally {
+		await server.close();
+	}
+});
+
+csp.run();
+
+// ---
 
 // ---
 

@@ -41,6 +41,12 @@ module.exports = function (dir, opts) {
 		}
 	}
 
+	if (opts.csp) {
+		opts.setHeaders = res => {
+			res.setHeader('Content-Security-Policy', opts.csp)
+		}
+	}
+
 	let server;
 	let fn = sirv(dir, opts);
 	let { hrtime, stdout } = process;
