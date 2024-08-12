@@ -20,9 +20,9 @@ function toAssume(uri, extns) {
 
 	let arr=[], tmp=`${uri}/index`;
 	for (; i < extns.length; i++) {
-		x = extns[i] ? `.${extns[i]}` : '';
-		if (uri) arr.push(uri + x);
-		arr.push(tmp + x);
+		x = extns[i][0] ? `.${extns[i][0]}` : '';
+		if (uri) arr.push([uri + x, extns[i][1]]);
+		arr.push([tmp + x, extns[i][1]]);
 	}
 
 	return arr;
@@ -31,7 +31,7 @@ function toAssume(uri, extns) {
 function viaCache(cache, uri, extns) {
 	let i=0, data, arr=toAssume(uri, extns);
 	for (; i < arr.length; i++) {
-		if (data = cache[arr[i]]) return data;
+		if (data = cache[arr[i][0]]) return data;
 	}
 }
 
@@ -39,11 +39,11 @@ function viaLocal(dir, isEtag, uri, extns) {
 	let i=0, arr=toAssume(uri, extns);
 	let abs, stats, name, headers;
 	for (; i < arr.length; i++) {
-		abs = normalize(join(dir, name=arr[i]));
+		abs = normalize(join(dir, name=arr[i][0]));
 		if (abs.startsWith(dir) && fs.existsSync(abs)) {
 			stats = fs.statSync(abs);
 			if (stats.isDirectory()) continue;
-			headers = toHeaders(name, stats, isEtag);
+			headers = toHeaders(name, stats, isEtag, arr[i][1]);
 			headers['Cache-Control'] = isEtag ? 'no-cache' : 'no-store';
 			return { abs, stats, headers };
 		}
@@ -97,8 +97,8 @@ const ENCODING = {
 	'.gz': 'gzip',
 };
 
-function toHeaders(name, stats, isEtag) {
-	let enc = ENCODING[name.slice(-3)];
+function toHeaders(name, stats, isEtag, encoded = true) {
+	let enc = encoded ? ENCODING[name.slice(-3)] : undefined;
 
 	let ctype = lookup(name.slice(0, enc && -3)) || '';
 	if (ctype === 'text/html') ctype += ';charset=utf-8';
@@ -164,12 +164,12 @@ export default function (dir, opts={}) {
 	let lookup = opts.dev ? viaLocal.bind(0, dir, isEtag) : viaCache.bind(0, FILES);
 
 	return function (req, res, next) {
-		let extns = [''];
+		let extns = [['', false]];
 		let pathname = parse(req).pathname;
 		let val = req.headers['accept-encoding'] || '';
-		if (gzips && val.includes('gzip')) extns.unshift(...gzips);
-		if (brots && /(br|brotli)/i.test(val)) extns.unshift(...brots);
-		extns.push(...extensions); // [...br, ...gz, orig, ...exts]
+		if (gzips && val.includes('gzip')) extns.unshift(...gzips.map(ext => [ext, true]));
+		if (brots && /(br|brotli)/i.test(val)) extns.unshift(...brots.map(ext => [ext, true]));
+		extns.push(...extensions.map(ext => [ext, false])); // [...br, ...gz, orig, ...exts]
 
 		if (pathname.indexOf('%') !== -1) {
 			try { pathname = decodeURI(pathname) }

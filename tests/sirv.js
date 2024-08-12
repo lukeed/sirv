@@ -859,6 +859,27 @@ gzip('should defer to brotli when "Accept-Encoding" allows both', async () => {
 	}
 });
 
+// TODO: handle also { dev: false }
+gzip('should not set "Content-Encoding" for a direct request of a copressed file', async () => {
+	let server = utils.http({ dev: true });
+
+	try {
+		let res1 = await server.send('GET', '/data.js.gz', { headers: { 'Accept-Encoding': 'gzip' } });
+		assert.is(res1.headers['content-type'], 'application/gzip');
+		assert.is(res1.headers['content-encoding'], undefined);
+		assert.is(res1.data, 'gzip js file\n');
+		assert.is(res1.statusCode, 200);
+
+		let res2 = await server.send('GET', '/data.js.gz');
+		assert.is(res2.headers['content-type'], 'application/gzip');
+		assert.is(res2.headers['content-encoding'], undefined);
+		assert.is(res2.data, 'gzip js file\n');
+		assert.is(res2.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
 gzip.run();
 
 // ---
