@@ -859,26 +859,76 @@ gzip('should defer to brotli when "Accept-Encoding" allows both', async () => {
 	}
 });
 
-// TODO: handle also { dev: false }
-gzip('should not set "Content-Encoding" for a direct request of a copressed file', async () => {
-	let server = utils.http({ dev: true });
-
+gzip('should not set "Content-Encoding" for a direct request of a copressed file (dev: true)', async () => {
+	let server = utils.http({ dev: true, gzip: true });
 	try {
-		let res1 = await server.send('GET', '/data.js.gz', { headers: { 'Accept-Encoding': 'gzip' } });
-		assert.is(res1.headers['content-type'], 'application/gzip');
-		assert.is(res1.headers['content-encoding'], undefined);
-		assert.is(res1.data, 'gzip js file\n');
-		assert.is(res1.statusCode, 200);
-
-		let res2 = await server.send('GET', '/data.js.gz');
-		assert.is(res2.headers['content-type'], 'application/gzip');
-		assert.is(res2.headers['content-encoding'], undefined);
-		assert.is(res2.data, 'gzip js file\n');
-		assert.is(res2.statusCode, 200);
+		await testGzipDirectRequest(server);
 	} finally {
 		server.close();
 	}
 });
+
+// TODO
+gzip.skip('should not set "Content-Encoding" for a direct request of a copressed file (dev: false)', async () => {
+	let server = utils.http({ dev: false, gzip: true });
+	try {
+		await testGzipDirectRequest(server);
+	} finally {
+		server.close();
+	}
+});
+
+async function testGzipDirectRequest(server) {
+	let headers = { 'Accept-Encoding': 'gzip' };
+
+	{
+		let res = await server.send('GET', '/test.csv.gz.gz', { headers });
+		assert.is(res.headers['content-type'], 'application/gzip');
+		assert.is(res.headers['content-encoding'], undefined);
+		assert.is(res.data, 'test.csv.gz.gz\n');
+		assert.is(res.statusCode, 200);
+	}
+
+	{
+		let res = await server.send('GET', '/test.csv.gz', { headers });
+		assert.is(res.headers['content-type'], 'application/gzip');
+		assert.is(res.headers['content-encoding'], 'gzip');
+		assert.is(res.data, 'test.csv.gz.gz\n');
+		assert.is(res.statusCode, 200);
+	}
+
+	{
+		let res = await server.send('GET', '/test.csv', { headers });
+		assert.is(res.headers['content-type'], 'text/csv');
+		assert.is(res.headers['content-encoding'], 'gzip');
+		assert.is(res.data, 'test.csv.gz\n');
+		assert.is(res.statusCode, 200);
+	}
+
+	{
+		let res = await server.send('GET', '/test.csv.gz.gz');
+		assert.is(res.headers['content-type'], 'application/gzip');
+		assert.is(res.headers['content-encoding'], undefined);
+		assert.is(res.data, 'test.csv.gz.gz\n');
+		assert.is(res.statusCode, 200);
+	}
+
+	{
+		let res = await server.send('GET', '/test.csv.gz');
+		assert.is(res.headers['content-type'], 'application/gzip');
+		assert.is(res.headers['content-encoding'], undefined);
+		assert.is(res.data, 'test.csv.gz\n');
+		assert.is(res.statusCode, 200);
+	}
+
+	{
+		let res = await server.send('GET', '/test.csv');
+		assert.is(res.headers['content-type'], 'text/csv');
+		assert.is(res.headers['content-encoding'], undefined);
+		assert.is(res.data, 'test.csv\n');
+		assert.is(res.statusCode, 200);
+	}
+}
 
 gzip.run();
 
