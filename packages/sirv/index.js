@@ -31,7 +31,9 @@ function toAssume(uri, extns) {
 function viaCache(cache, uri, extns) {
 	let i=0, data, arr=toAssume(uri, extns);
 	for (; i < arr.length; i++) {
-		if (data = cache[arr[i][0]]) return data;
+		if (data = cache[arr[i][0]]) {
+			return { ...data, name: arr[i][0], encoded: arr[i][1] };
+		}
 	}
 }
 
@@ -43,9 +45,9 @@ function viaLocal(dir, isEtag, uri, extns) {
 		if (abs.startsWith(dir) && fs.existsSync(abs)) {
 			stats = fs.statSync(abs);
 			if (stats.isDirectory()) continue;
-			headers = toHeaders(name, stats, isEtag, arr[i][1]);
+			headers = toHeaders(stats, isEtag);
 			headers['Cache-Control'] = isEtag ? 'no-cache' : 'no-store';
-			return { abs, stats, headers };
+			return { abs, stats, headers, name, encoded: arr[i][1] };
 		}
 	}
 }
@@ -54,9 +56,16 @@ function is404(req, res) {
 	return (res.statusCode=404,res.end());
 }
 
-function send(req, res, file, stats, headers) {
+function send(req, res, file, stats, headers, name, encoded) {
 	let code=200, tmp, opts={};
 	headers = { ...headers };
+
+	let enc = encoded ? ENCODING[name.slice(-3)] : undefined;
+	if (enc) headers['Content-Encoding'] = enc;
+
+	let ctype = lookup(name.slice(0, enc && -3)) || '';
+	if (ctype === 'text/html') ctype += ';charset=utf-8';
+	headers['Content-Type'] = ctype;
 
 	for (let key in headers) {
 		tmp = res.getHeader(key);
@@ -97,19 +106,12 @@ const ENCODING = {
 	'.gz': 'gzip',
 };
 
-function toHeaders(name, stats, isEtag, encoded = true) {
-	let enc = encoded ? ENCODING[name.slice(-3)] : undefined;
-
-	let ctype = lookup(name.slice(0, enc && -3)) || '';
-	if (ctype === 'text/html') ctype += ';charset=utf-8';
-
+function toHeaders(stats, isEtag) {
 	let headers = {
 		'Content-Length': stats.size,
-		'Content-Type': ctype,
 		'Last-Modified': stats.mtime.toUTCString(),
 	};
 
-	if (enc) headers['Content-Encoding'] = enc;
 	if (isEtag) headers['ETag'] = `W/"${stats.size}-${stats.mtime.getTime()}"`;
 
 	return headers;
@@ -154,7 +156,7 @@ export default function (dir, opts={}) {
 			if (/\.well-known[\\+\/]/.test(name)) {} // keep
 			else if (!opts.dotfiles && /(^\.|[\\+|\/+]\.)/.test(name)) return;
 
-			let headers = toHeaders(name, stats, isEtag);
+			let headers = toHeaders(stats, isEtag);
 			if (cc) headers['Cache-Control'] = cc;
 
 			FILES['/' + name.normalize().replace(/\\+/g, '/')] = { abs, stats, headers };
@@ -189,6 +191,6 @@ export default function (dir, opts={}) {
 		}
 
 		setHeaders(res, pathname, data.stats);
-		send(req, res, data.abs, data.stats, data.headers);
+		send(req, res, data.abs, data.stats, data.headers, data.name, data.encoded);
 	};
 }

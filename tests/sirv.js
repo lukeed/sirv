@@ -868,8 +868,7 @@ gzip('should not set "Content-Encoding" for a direct request of a copressed file
 	}
 });
 
-// TODO
-gzip.skip('should not set "Content-Encoding" for a direct request of a copressed file (dev: false)', async () => {
+gzip('should not set "Content-Encoding" for a direct request of a copressed file (dev: false)', async () => {
 	let server = utils.http({ dev: false, gzip: true });
 	try {
 		await testGzipDirectRequest(server);
