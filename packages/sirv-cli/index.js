@@ -1,8 +1,8 @@
 const sirv = require('sirv');
 const colors = require('kleur');
 const semiver = require('semiver');
-const { resolve } = require('path');
-const { readFileSync } = require('fs');
+const { resolve } = require('node:path');
+const { readFileSync } = require('node:fs');
 const laccess = require('local-access');
 const clear = require('console-clear');
 const tinydate = require('tinydate');
