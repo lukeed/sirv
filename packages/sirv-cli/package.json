@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "console-clear": "^1.1.0",
-    "get-port": "^3.2.0",
+    "get-port": "^5.1.1",
     "kleur": "^4.1.4",
     "local-access": "^1.0.1",
     "sade": "^1.6.0",
