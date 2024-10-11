@@ -11,13 +11,16 @@
   "bin": {
     "sirv": "bin.js"
   },
+  "exports": {
+    "./package.json": "./package.json"
+  },
   "author": {
     "name": "Luke Edwards",
     "email": "luke@lukeed.com",
     "url": "https://lukeed.com"
   },
   "engines": {
-    "node": ">= 10"
+    "node": ">=18"
   },
   "dependencies": {
     "console-clear": "^1.1.0",
