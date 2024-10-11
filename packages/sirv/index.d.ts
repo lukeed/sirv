@@ -1,10 +1,16 @@
-declare module 'sirv' {
-	import type { Stats } from 'fs';
-	import type { IncomingMessage, ServerResponse } from 'http';
+import type { Stats } from "node:fs";
+import type { IncomingMessage, ServerResponse } from "node:http";
 
+declare namespace sirv {
 	type Arrayable<T> = T | T[];
+
 	export type NextHandler = () => void | Promise<void>;
-	export type RequestHandler = (req: IncomingMessage, res: ServerResponse, next?: NextHandler) => void;
+
+	export type RequestHandler = (
+		req: IncomingMessage,
+		res: ServerResponse,
+		next?: NextHandler,
+	) => void;
 
 	export interface Options {
 		dev?: boolean;
@@ -20,6 +26,8 @@ declare module 'sirv' {
 		onNoMatch?: (req: IncomingMessage, res: ServerResponse) => void;
 		setHeaders?: (res: ServerResponse, pathname: string, stats: Stats) => void;
 	}
-
-	export default function(dir?: string, opts?: Options): RequestHandler;
 }
+
+declare function sirv(dir?: string, opts?: sirv.Options): sirv.RequestHandler;
+
+export = sirv;

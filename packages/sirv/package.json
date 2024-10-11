@@ -9,16 +9,16 @@
   "license": "MIT",
   "files": [
     "build.*",
-    "sirv.d.ts"
+    "index.d.*"
   ],
   "exports": {
     ".": {
       "import": {
-        "types": "./sirv.d.ts",
+        "types": "./index.d.mts",
         "default": "./build.mjs"
       },
       "require": {
-        "types": "./sirv.d.ts",
+        "types": "./index.d.ts",
         "default": "./build.js"
       }
     },
