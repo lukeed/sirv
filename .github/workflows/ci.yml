@@ -10,32 +10,31 @@ jobs:
       matrix:
         nodejs: [10, 12, 14, 16, 18]
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.nodejs }}
-    - uses: pnpm/action-setup@v2.2.4
+    - uses: oven-sh/setup-bun@v2
       with:
-        version: 5
-        run_install: false
+        bun-version: 1.1.30
 
     - name: Install
-      run: pnpm install
+      run: bun install
 
     - name: (coverage) Install
       if: matrix.nodejs >= 18
-      run: pnpm add -g c8
+      run: bun add -g c8
 
     - name: Build
-      run: pnpm run build
+      run: bun run build
 
     - name: Test
       if: matrix.nodejs < 18
-      run: pnpm test
+      run: npm test
 
     - name: (coverage) Test
       if: matrix.nodejs >= 18
-      run: c8 --include=packages pnpm test
+      run: c8 --include=packages npm test
 
     - name: (coverage) Report
       if: matrix.nodejs >= 18

@@ -9,6 +9,9 @@
     "build": "node builder",
     "test": "uvu -r esm tests -i public -i helpers"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "devDependencies": {
     "bump": "1.0.0-next.1",
     "bundt": "1.1.5",
