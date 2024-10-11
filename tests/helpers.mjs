@@ -1,12 +1,19 @@
-import * as fs from 'fs';
-import { join } from 'path';
+import * as fs from 'node:fs';
+import { promisify } from 'node:util';
+import { createServer } from 'node:http';
+import { join, dirname } from 'node:path';
+import { createRequire } from 'node:module';
+import { spawnSync, execFile } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
 import { send } from 'httpie';
 import * as mime from 'mrmime';
-import { promisify } from 'util';
-import { createServer } from 'http';
-import * as child from 'child_process';
 import * as assert from 'uvu/assert';
-import sirv from '../packages/sirv';
+import sirv from '../packages/sirv/index.mjs';
+
+const require = createRequire(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const www = join(__dirname, 'public');
 const BIN = require.resolve('../packages/sirv-cli/bin.js');
@@ -31,13 +38,13 @@ export function http(opts) {
 }
 
 export function exec(...argv) {
-	return child.spawnSync('node', [BIN, www, ...argv]);
+	return spawnSync('node', [BIN, www, ...argv]);
 }
 
 export function spawn(...argv) {
 	return new Promise(r => {
 		let address, output='';
-		let pid = child.execFile('node', [BIN, www, ...argv]);
+		let pid = execFile('node', [BIN, www, ...argv]);
 
 		pid.stdout.on('data', x => {
 			output += x.toString();

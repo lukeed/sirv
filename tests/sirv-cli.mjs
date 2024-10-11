@@ -1,7 +1,7 @@
 import { suite } from 'uvu';
-import assert from 'uvu/assert';
 import selfsigned from 'selfsigned';
-import * as utils from './helpers';
+import * as assert from 'uvu/assert';
+import * as utils from './helpers.mjs';
 
 const help = suite('help');
 

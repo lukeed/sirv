@@ -1,18 +1,17 @@
-// TODO: temporary
-const { promisify } = require('util');
-const { execFile } = require('child_process');
-const { packages } = require('./bump.json');
+const { resolve } = require('node:path');
+const { promisify } = require('node:util');
+const { execFile } = require('node:child_process');
 
-const ENV = { ...process.env, FORCE_COLOR: '1' };
 const BIN = require.resolve('bundt');
 const run = promisify(execFile);
 
 (async function () {
-	for (let dir of packages) {
-		console.log('~> "%s"', dir);
-		let output = await run(BIN, ['index.js'], { env:ENV, cwd:dir });
-		process.stdout.write(output.stdout.substring(1));
-	}
+	let output = await run(BIN, ['index.mjs'], {
+		env: { ...process.env, FORCE_COLOR: '1' },
+		cwd: resolve('packages/sirv'),
+	});
+
+	process.stdout.write(output.stdout.substring(1));
 })().catch(err => {
 	console.log('ERROR', err.stack);
 	process.exit(1);

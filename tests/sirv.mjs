@@ -1,7 +1,7 @@
 import { suite } from 'uvu';
-import assert from 'uvu/assert';
-import sirv from '../packages/sirv';
-import * as utils from './helpers';
+import * as assert from 'uvu/assert';
+import sirv from '../packages/sirv/index.mjs';
+import * as utils from './helpers.mjs';
 
 const types = suite('types');
 
