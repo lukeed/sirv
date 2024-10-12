@@ -6,13 +6,15 @@
     "url": "https://lukeed.com"
   },
   "scripts": {
-    "build": "node builder",
-    "test": "uvu -r esm tests -i public -i helpers"
+    "build": "node builder.js",
+    "test": "uvu tests -i public -i helpers"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "devDependencies": {
     "bump": "1.0.0-next.1",
     "bundt": "1.1.5",
-    "esm": "3.2.25",
     "httpie": "2.0.0-next.13",
     "mrmime": "2.0.0",
     "selfsigned": "2.4.1",

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const sade = require('sade');
 const boot = require('./index');
-const pkg = require('./package');
+const pkg = require('./package.json');
 
 sade('sirv [dir]')
 	.version(pkg.version)

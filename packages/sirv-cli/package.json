@@ -1,6 +1,6 @@
 {
   "name": "sirv-cli",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "A lightweight CLI program to serve static sites~!",
   "repository": "lukeed/sirv",
   "main": "index.js",
@@ -11,22 +11,25 @@
   "bin": {
     "sirv": "bin.js"
   },
+  "exports": {
+    "./package.json": "./package.json"
+  },
   "author": {
     "name": "Luke Edwards",
     "email": "luke@lukeed.com",
     "url": "https://lukeed.com"
   },
   "engines": {
-    "node": ">= 10"
+    "node": ">=18"
   },
   "dependencies": {
     "console-clear": "^1.1.0",
-    "get-port": "^3.2.0",
+    "get-port": "^5.1.1",
     "kleur": "^4.1.4",
     "local-access": "^1.0.1",
     "sade": "^1.6.0",
     "semiver": "^1.0.0",
-    "sirv": "^2.0.0",
+    "sirv": "^3.0.0",
     "tinydate": "^1.0.0"
   }
 }
