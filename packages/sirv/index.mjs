@@ -20,9 +20,9 @@ function toAssume(uri, extns) {
 
 	let arr=[], tmp=`${uri}/index`;
 	for (; i < extns.length; i++) {
-		x = extns[i] ? `.${extns[i]}` : '';
-		if (uri) arr.push(uri + x);
-		arr.push(tmp + x);
+		x = extns[i].ext ? `.${extns[i].ext}` : '';
+		if (uri) arr.push({ name: uri + x, encoded: extns[i].encoded });
+		arr.push({ name: tmp + x, encoded: extns[i].encoded });
 	}
 
 	return arr;
@@ -31,7 +31,9 @@ function toAssume(uri, extns) {
 function viaCache(cache, uri, extns) {
 	let i=0, data, arr=toAssume(uri, extns);
 	for (; i < arr.length; i++) {
-		if (data = cache[arr[i]]) return data;
+		if (data = cache[arr[i].name]) {
+			return { ...data, ...arr[i] };
+		}
 	}
 }
 
@@ -39,13 +41,13 @@ function viaLocal(dir, isEtag, uri, extns) {
 	let i=0, arr=toAssume(uri, extns);
 	let abs, stats, name, headers;
 	for (; i < arr.length; i++) {
-		abs = normalize(join(dir, name=arr[i]));
+		abs = normalize(join(dir, name=arr[i].name));
 		if (abs.startsWith(dir) && fs.existsSync(abs)) {
 			stats = fs.statSync(abs);
 			if (stats.isDirectory()) continue;
-			headers = toHeaders(name, stats, isEtag);
+			headers = toHeaders(stats, isEtag);
 			headers['Cache-Control'] = isEtag ? 'no-cache' : 'no-store';
-			return { abs, stats, headers };
+			return { abs, stats, headers, ...arr[i] };
 		}
 	}
 }
@@ -54,9 +56,16 @@ function is404(req, res) {
 	return (res.statusCode=404,res.end());
 }
 
-function send(req, res, file, stats, headers) {
+function send(req, res, file, stats, headers, name, encoded) {
 	let code=200, tmp, opts={};
 	headers = { ...headers };
+
+	let enc = encoded ? ENCODING[name.slice(-3)] : undefined;
+	if (enc) headers['Content-Encoding'] = enc;
+
+	let ctype = lookup(name.slice(0, enc && -3)) || '';
+	if (ctype === 'text/html') ctype += ';charset=utf-8';
+	headers['Content-Type'] = ctype;
 
 	for (let key in headers) {
 		tmp = res.getHeader(key);
@@ -97,19 +106,12 @@ const ENCODING = {
 	'.gz': 'gzip',
 };
 
-function toHeaders(name, stats, isEtag) {
-	let enc = ENCODING[name.slice(-3)];
-
-	let ctype = lookup(name.slice(0, enc && -3)) || '';
-	if (ctype === 'text/html') ctype += ';charset=utf-8';
-
+function toHeaders(stats, isEtag) {
 	let headers = {
 		'Content-Length': stats.size,
-		'Content-Type': ctype,
 		'Last-Modified': stats.mtime.toUTCString(),
 	};
 
-	if (enc) headers['Content-Encoding'] = enc;
 	if (isEtag) headers['ETag'] = `W/"${stats.size}-${stats.mtime.getTime()}"`;
 
 	return headers;
@@ -154,7 +156,7 @@ export default function (dir, opts={}) {
 			if (/\.well-known[\\+\/]/.test(name)) {} // keep
 			else if (!opts.dotfiles && /(^\.|[\\+|\/+]\.)/.test(name)) return;
 
-			let headers = toHeaders(name, stats, isEtag);
+			let headers = toHeaders(stats, isEtag);
 			if (cc) headers['Cache-Control'] = cc;
 
 			FILES['/' + name.normalize().replace(/\\+/g, '/')] = { abs, stats, headers };
@@ -164,12 +166,12 @@ export default function (dir, opts={}) {
 	let lookup = opts.dev ? viaLocal.bind(0, dir, isEtag) : viaCache.bind(0, FILES);
 
 	return function (req, res, next) {
-		let extns = [''];
+		let extns = [{ ext: '', encoded: false }];
 		let pathname = parse(req).pathname;
 		let val = req.headers['accept-encoding'] || '';
-		if (gzips && val.includes('gzip')) extns.unshift(...gzips);
-		if (brots && /(br|brotli)/i.test(val)) extns.unshift(...brots);
-		extns.push(...extensions); // [...br, ...gz, orig, ...exts]
+		if (gzips && val.includes('gzip')) extns.unshift(...gzips.map(ext => ({ ext, encoded: true })));
+		if (brots && /(br|brotli)/i.test(val)) extns.unshift(...brots.map(ext => ({ ext, encoded: true })));
+		extns.push(...extensions.map(ext => ({ ext, encoded: false }))); // [...br, ...gz, orig, ...exts]
 
 		if (pathname.indexOf('%') !== -1) {
 			try { pathname = decodeURI(pathname) }
@@ -189,6 +191,6 @@ export default function (dir, opts={}) {
 		}
 
 		setHeaders(res, pathname, data.stats);
-		send(req, res, data.abs, data.stats, data.headers);
+		send(req, res, data.abs, data.stats, data.headers, data.name, data.encoded);
 	};
 }
