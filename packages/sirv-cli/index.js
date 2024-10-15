@@ -78,7 +78,7 @@ module.exports = function (dir, opts) {
 		});
 	}
 
-	opts.port = PORT || opts.port;
+	opts.port = parseInt(PORT || opts.port, 10);
 	let hostname = HOST || opts.host || '0.0.0.0';
 	toPort({ host: hostname, port: opts.port }).then(port => {
 		let isOther = port != opts.port;
