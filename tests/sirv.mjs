@@ -609,6 +609,48 @@ dotfiles.run();
 
 // ---
 
+const root = suite('root');
+root('should serve at the given root option', async () => {
+	let server = utils.http({ root: '/application/' });
+
+	try {
+		await server.send('GET', '/sw.js').catch(err => {
+			assert.is(err.statusCode, 404);
+		});
+
+		let res = await server.send('GET', '/application/sw.js');
+		assert.is(res.headers['content-type'], 'text/javascript');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+root('should serve directories at the given root option', async () => {
+	let server = utils.http({ root: '/application/' });
+
+	try {
+		let res = await server.send('GET', '/application/contact/index.html');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+root('should ensure leading and trailing slash on root option', async () => {
+	let server = utils.http({ root: 'application' });
+
+	try {
+		let res = await server.send('GET', '/application/sw.js');
+		assert.is(res.headers['content-type'], 'text/javascript');
+		assert.is(res.statusCode, 200);
+	} finally {
+		server.close();
+	}
+});
+
+root.run();
+
+// ---
+
 const dev = suite('dev');
 
 dev('should not rely on initial Cache fill', async () => {
