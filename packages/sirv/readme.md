@@ -66,6 +66,25 @@ Additionally, `dev` mode will ignore `maxAge` and `immutable` as these options g
 
 > **Important:** Do not use `dev` mode in production!
 
+#### opts.root
+Type: `String`<br>
+Default: `/`
+
+Denote the used URI prefix that the given resources will be served to. By default, every resource will be served at the root (`/`).
+
+This option will always ensure at least one leading and trailing slash, meaning that
+`directory`, `/directory` and `directory/` will all be completed to `/directory/`.
+
+For example, using some arbitrary web server:
+```js
+// Will serve `./static/js/common.js` as `/js/common.js`
+app.use(Sirv('./static/'))
+
+// Will serve `./static/js/common.js` as `/my-directory/js/common.js`
+app.use(Sirv('./static/', { root: '/my-directory/' }))
+```
+
+
 #### opts.etag
 Type: `Boolean`<br>
 Default: `false`
