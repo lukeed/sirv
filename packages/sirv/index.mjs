@@ -12,7 +12,13 @@ function isMatch(uri, arr) {
 	}
 }
 
-function toAssume(uri, extns) {
+function toAssume(uri, root, extns) {
+	if (root) {
+	  if (!uri.startsWith(root)) return [];
+		// -1 to keep the trailing (now leading) slash
+		uri = uri.substring(root.length - 1);
+	}
+
 	let i=0, x, len=uri.length - 1;
 	if (uri.charCodeAt(len) === 47) {
 		uri = uri.substring(0, len);
@@ -28,15 +34,15 @@ function toAssume(uri, extns) {
 	return arr;
 }
 
-function viaCache(cache, uri, extns) {
-	let i=0, data, arr=toAssume(uri, extns);
+function viaCache(cache, root, uri, extns) {
+	let i=0, data, arr=toAssume(uri, root, extns);
 	for (; i < arr.length; i++) {
 		if (data = cache[arr[i]]) return data;
 	}
 }
 
-function viaLocal(dir, isEtag, uri, extns) {
-	let i=0, arr=toAssume(uri, extns);
+function viaLocal(dir, root, isEtag, uri, extns) {
+	let i=0, arr=toAssume(uri, root, extns);
 	let abs, stats, name, headers;
 	for (; i < arr.length; i++) {
 		abs = normalize(join(dir, name=arr[i]));
@@ -128,6 +134,8 @@ export default function (dir, opts={}) {
 	const FILES = {};
 
 	let fallback = '/';
+	// Ensure that `opts.root` starts and ends with /, regardless of input
+	let root = opts.root && '/' + opts.root.match(/^\/?(.*?)\/?$/)[1] + '/';
 	let isEtag = !!opts.etag;
 	let isSPA = !!opts.single;
 	if (typeof opts.single === 'string') {
@@ -161,7 +169,7 @@ export default function (dir, opts={}) {
 		});
 	}
 
-	let lookup = opts.dev ? viaLocal.bind(0, dir, isEtag) : viaCache.bind(0, FILES);
+	let lookup = opts.dev ? viaLocal.bind(0, dir, root, isEtag) : viaCache.bind(0, FILES, root);
 
 	return function (req, res, next) {
 		let extns = [''];
