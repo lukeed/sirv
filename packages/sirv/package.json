@@ -4,7 +4,7 @@
   "description": "The optimized & lightweight middleware for serving requests to static assets",
   "repository": "lukeed/sirv",
   "module": "build.mjs",
-  "types": "sirv.d.ts",
+  "types": "index.d.ts",
   "main": "build.js",
   "license": "MIT",
   "files": [
