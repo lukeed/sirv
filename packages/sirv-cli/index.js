@@ -34,10 +34,14 @@ module.exports = function (dir, opts) {
 	dir = resolve(dir || '.');
 	opts.maxAge = opts.m;
 
-	if (opts.cors) {
-		opts.setHeaders = res => {
+	opts.setHeaders = res => {
+		if (opts.cors) {
 			res.setHeader('Access-Control-Allow-Origin', '*');
 			res.setHeader('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept, Range');
+		}
+		if (opts.corp) {
+			res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+			res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
 		}
 	}
 
