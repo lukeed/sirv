@@ -187,7 +187,13 @@ export default function (dir, opts={}) {
 			return res.end();
 		}
 
-		if (gzips || brots) {
+		// When a users "requests" a file, sirv may "choose" a different (compressed) version based
+		// on the current options (gzip, brotli), request headers ("Accept-Encoding"), and available files.
+		// We should only set "Vary: Accept-Encoding" if a compressed version of the requested file exists
+		// and was chosen instead of the requested file.
+		const isChosenFileCompressed = !!data.headers['Content-Encoding'];
+		const doesChosenFileMatchRequestedFile = data.abs.endsWith(pathname);
+		if (isChosenFileCompressed && !doesChosenFileMatchRequestedFile) {
 			res.setHeader('Vary', 'Accept-Encoding');
 		}
 
