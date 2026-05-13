@@ -1100,6 +1100,26 @@ ranges('should shrink range end if it cannot be met (overflow)', async () => {
 	}
 });
 
+ranges('should send the last N bytes for a suffix range', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=-8' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+
+		let start = file.size - 8;
+		let end = file.size - 1;
+
+		assert.is(res.statusCode, 206);
+		assert.is(res.headers['content-length'], '8');
+		assert.is(res.headers['accept-ranges'], 'bytes');
+		assert.is(res.headers['content-range'], `bytes ${start}-${end}/${file.size}`);
+	} finally {
+		server.close();
+	}
+});
+
 ranges('should not mutate response headers on subsequent non-Range requests :: dev', async () => {
 	let server = utils.http({ dev: true });
 
