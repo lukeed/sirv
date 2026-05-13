@@ -73,11 +73,22 @@ function send(req, res, file, stats, headers) {
 	if (req.headers.range) {
 		code = 206;
 		let [x, y] = req.headers.range.replace('bytes=', '').split('-');
-		let end = opts.end = parseInt(y, 10) || stats.size - 1;
-		let start = opts.start = parseInt(x, 10) || 0;
+		let start, end;
+
+		if (x === '' && y !== '' && y !== undefined) {
+			let suffix = parseInt(y, 10);
+			start = Math.max(0, stats.size - suffix);
+			end = stats.size - 1;
+		} else {
+			end = parseInt(y, 10) || stats.size - 1;
+			start = parseInt(x, 10) || 0;
+		}
+
+		opts.start = start;
+		opts.end = end;
 
 		if (end >= stats.size) {
-			end = stats.size - 1;
+			end = opts.end = stats.size - 1;
 		}
 
 		if (start >= stats.size) {
