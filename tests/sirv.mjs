@@ -1100,6 +1100,52 @@ ranges('should shrink range end if it cannot be met (overflow)', async () => {
 	}
 });
 
+// Regression: a malformed `Range` end larger than `Number.MAX_SAFE_INTEGER`
+// (e.g. `2^64-1` from a bot probe) used to crash the process because the
+// lexical `end` variable was clamped but `opts.end` retained the unsafe
+// value, which `fs.createReadStream({ end })` rejects with `RangeError`.
+ranges('should clamp range end above MAX_SAFE_INTEGER without crashing', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=0-18446744073709551615' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+		assert.is(res.statusCode, 206);
+		assert.is(res.headers['content-range'], `bytes 0-${file.size - 1}/${file.size}`);
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should fall back to a full-file response when range start is above MAX_SAFE_INTEGER', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=18446744073709551615-' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+		assert.is(res.statusCode, 206);
+		assert.is(res.headers['content-range'], `bytes 0-${file.size - 1}/${file.size}`);
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should treat a non-numeric range as a full-file request', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=abc-def' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+		assert.is(res.statusCode, 206);
+		assert.is(res.headers['content-range'], `bytes 0-${file.size - 1}/${file.size}`);
+	} finally {
+		server.close();
+	}
+});
+
 ranges('should not mutate response headers on subsequent non-Range requests :: dev', async () => {
 	let server = utils.http({ dev: true });
 
