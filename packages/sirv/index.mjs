@@ -155,7 +155,7 @@ export default function (dir, opts={}) {
 	if (!opts.dev) {
 		totalist(dir, (name, abs, stats) => {
 			if (/\.well-known[\\+\/]/.test(name)) {} // keep
-			else if (!opts.dotfiles && /(^\.|[\\+|\/+]\.)/.test(name)) return;
+			else if (!opts.dotfiles && /(^\.|[\\/]\.)/.test(name)) return;
 
 			let headers = toHeaders(name, stats, isEtag);
 			if (cc) headers['Cache-Control'] = cc;
