@@ -739,6 +739,53 @@ etag('should allow "If-None-Match" directive to function', async () => {
 	}
 });
 
+etag('should use weak comparison for "If-None-Match"', async () => {
+	let server = utils.http({ etag: true });
+
+	try {
+		let res1 = await server.send('GET', '/bundle.67329.js');
+		let value = res1.headers['etag'].substring(2);
+		let headers = { 'If-None-Match': value };
+		let res2 = await server.send('GET', '/bundle.67329.js', { headers });
+		assert.is(res2.statusCode, 304, 'weak and strong tags match');
+		assert.is(res2.data, '', 'send empty response body');
+	} finally {
+		server.close();
+	}
+});
+
+etag('should match an ETag list or wildcard', async () => {
+	let server = utils.http({ etag: true });
+
+	try {
+		let res1 = await server.send('GET', '/bundle.67329.js');
+		let value = res1.headers['etag'].substring(2);
+
+		for (let header of [`"other,tag", ${value}`, '*']) {
+			let headers = { 'If-None-Match': header };
+			let res2 = await server.send('GET', '/bundle.67329.js', { headers });
+			assert.is(res2.statusCode, 304, `match ${header}`);
+			assert.is(res2.data, '', 'send empty response body');
+		}
+	} finally {
+		server.close();
+	}
+});
+
+etag('should ignore malformed or non-matching "If-None-Match" values', async () => {
+	let server = utils.http({ etag: true });
+
+	try {
+		for (let header of ['"other"', '"unterminated']) {
+			let headers = { 'If-None-Match': header };
+			let res = await server.send('GET', '/bundle.67329.js', { headers });
+			assert.is(res.statusCode, 200, `ignore ${header}`);
+		}
+	} finally {
+		server.close();
+	}
+});
+
 etag('should force `Cache-Control` header in `dev` mode', async () => {
 	let server = utils.http({ etag: true, dev: true });
 
