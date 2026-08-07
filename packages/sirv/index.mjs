@@ -57,6 +57,41 @@ function is404(req, res) {
 	return (res.statusCode=404,res.end());
 }
 
+function matchesIfNoneMatch(value, etag) {
+	if (!value) return false;
+	if (value.trim() === '*') return true;
+
+	let i=0, matched=false;
+	etag = etag.startsWith('W/') ? etag.substring(2) : etag;
+
+	while (i < value.length) {
+		while (value[i] === ' ' || value[i] === '\t' || value[i] === ',') i++;
+		if (i >= value.length) return matched;
+
+		let start=i;
+		if (value.startsWith('W/', i)) i += 2;
+		if (value.charCodeAt(i++) !== 0x22) return false;
+
+		while (i < value.length && value.charCodeAt(i) !== 0x22) {
+			let code = value.charCodeAt(i++);
+			if (code !== 0x21 && !(code >= 0x23 && code <= 0x7e) && !(code >= 0x80 && code <= 0xff)) {
+				return false;
+			}
+		}
+		if (value.charCodeAt(i++) !== 0x22) return false;
+
+		let candidate = value.substring(start, i);
+		if (candidate.startsWith('W/')) candidate = candidate.substring(2);
+		if (candidate === etag) matched = true;
+
+		while (value[i] === ' ' || value[i] === '\t') i++;
+		if (i >= value.length) return matched;
+		if (value[i++] !== ',') return false;
+	}
+
+	return matched;
+}
+
 function send(req, res, file, stats, headers) {
 	let code=200, tmp, opts={};
 	headers = { ...headers };
@@ -182,7 +217,7 @@ export default function (dir, opts={}) {
 		let data = lookup(pathname, extns) || isSPA && !isMatch(pathname, ignores) && lookup(fallback, extns);
 		if (!data) return next ? next() : isNotFound(req, res);
 
-		if (isEtag && req.headers['if-none-match'] === data.headers['ETag']) {
+		if (isEtag && matchesIfNoneMatch(req.headers['if-none-match'], data.headers['ETag'])) {
 			res.writeHead(304);
 			return res.end();
 		}
