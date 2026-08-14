@@ -9,7 +9,7 @@ help('--help', () => {
 	let pid = utils.exec('--help');
 	assert.is(pid.status, 0);
 	assert.snapshot(
-		// prints extra NL; dedent doesnt cooperate
+		// prints extra NL; dedent doesn't cooperate
 		pid.stdout.toString().trimRight() + '\n      ',
 		`
       Description
