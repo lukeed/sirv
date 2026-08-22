@@ -73,8 +73,22 @@ function send(req, res, file, stats, headers) {
 	if (req.headers.range) {
 		code = 206;
 		let [x, y] = req.headers.range.replace('bytes=', '').split('-');
-		let end = opts.end = parseInt(y, 10) || stats.size - 1;
-		let start = opts.start = parseInt(x, 10) || 0;
+		let start, end;
+
+		if (x === '' && y !== '') {
+			// suffix range: last N bytes (RFC 9110 §14.1.2)
+			let n = parseInt(y, 10);
+			if (!n) {
+				res.setHeader('Content-Range', `bytes */${stats.size}`);
+				res.statusCode = 416;
+				return res.end();
+			}
+			start = opts.start = Math.max(stats.size - n, 0);
+			end = opts.end = stats.size - 1;
+		} else {
+			end = opts.end = parseInt(y, 10) || stats.size - 1;
+			start = opts.start = parseInt(x, 10) || 0;
+		}
 
 		if (end >= stats.size) {
 			end = stats.size - 1;
