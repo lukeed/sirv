@@ -1071,6 +1071,55 @@ ranges('should assume the end-value is final byte when not included :: full', as
 	}
 });
 
+ranges('should send the last N bytes for a suffix range (RFC 9110 §14.1.2)', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=-8' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+
+		assert.is(res.statusCode, 206);
+		assert.is(res.headers['content-length'], '8');
+		assert.is(res.headers['accept-ranges'], 'bytes');
+		assert.is(res.headers['content-range'], `bytes ${file.size - 8}-${file.size - 1}/${file.size}`);
+		assert.is(res.data, file.data.slice(-8));
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should send the whole file when the suffix length exceeds it', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=-99999' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+
+		assert.is(res.statusCode, 206);
+		assert.is(res.headers['content-length'], String(file.size));
+		assert.is(res.headers['content-range'], `bytes 0-${file.size - 1}/${file.size}`);
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should throw `416` for a zero-length suffix range', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=-0' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		await server.send('GET', '/bundle.67329.js', { headers }).catch(err => {
+			assert.is(err.headers['content-range'], `bytes */${file.size}`);
+			assert.is(err.statusCode, 416);
+		});
+	} finally {
+		server.close();
+	}
+});
+
 ranges('should throw `416` when range start cannot be met (overflow)', async () => {
 	let server = utils.http();
 
