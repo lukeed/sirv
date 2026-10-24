@@ -424,6 +424,18 @@ single('should NOT fallback to "index.html" for URLs with extension', async () =
 	}
 });
 
+single('should handle long extensionless URLs without pathological backtracking', async () => {
+	let server = utils.http({ single: true });
+	let pathname = '/' + 'a%2e'.repeat(80) + '%21';
+
+	try {
+		let res = await server.send('GET', pathname);
+		await utils.matches(res, 200, 'index.html', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
 single.run();
 
 // ---

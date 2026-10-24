@@ -5,11 +5,29 @@ import { parse } from '@polka/url';
 import { lookup } from 'mrmime';
 
 const noop = () => {};
+const isFileNameChar = /^[A-Za-z\s\d~$._-]$/;
+const isExtensionChar = /^\w$/;
 
 function isMatch(uri, arr) {
 	for (let i=0; i < arr.length; i++) {
-		if (arr[i].test(uri)) return true;
+		if (typeof arr[i] === 'function' ? arr[i](uri) : arr[i].test(uri)) return true;
 	}
+}
+
+function hasFileExtension(uri) {
+	let start = uri.lastIndexOf('/') + 1;
+	let dot = uri.lastIndexOf('.');
+	if (dot <= start || dot === uri.length - 1) return false;
+
+	for (let i = start; i < dot; i++) {
+		if (!isFileNameChar.test(uri[i])) return false;
+	}
+
+	for (let i = dot + 1; i < uri.length; i++) {
+		if (!isExtensionChar.test(uri[i])) return false;
+	}
+
+	return true;
 }
 
 function toAssume(uri, extns) {
@@ -140,7 +158,7 @@ export default function (dir, opts={}) {
 
 	let ignores = [];
 	if (opts.ignores !== false) {
-		ignores.push(/[/]([A-Za-z\s\d~$._-]+\.\w+){1,}$/); // any extn
+		ignores.push(hasFileExtension); // any extn
 		if (opts.dotfiles) ignores.push(/\/\.\w/);
 		else ignores.push(/\/\.well-known/);
 		[].concat(opts.ignores || []).forEach(x => {
