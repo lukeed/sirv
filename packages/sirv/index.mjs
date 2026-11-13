@@ -73,7 +73,9 @@ function send(req, res, file, stats, headers) {
 	if (req.headers.range) {
 		code = 206;
 		let [x, y] = req.headers.range.replace('bytes=', '').split('-');
-		let end = opts.end = parseInt(y, 10) || stats.size - 1;
+		let end = parseInt(y, 10);
+		if (isNaN(end)) end = stats.size - 1;
+		opts.end = end;
 		let start = opts.start = parseInt(x, 10) || 0;
 
 		if (end >= stats.size) {

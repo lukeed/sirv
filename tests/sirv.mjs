@@ -1071,6 +1071,23 @@ ranges('should assume the end-value is final byte when not included :: full', as
 	}
 });
 
+ranges('should send a single byte when the range end is 0', async () => {
+	let server = utils.http();
+
+	try {
+		let headers = { Range: 'bytes=0-0' };
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+
+		assert.is(res.statusCode, 206);
+		assert.is(res.headers['content-length'], '1');
+		assert.is(res.headers['content-range'], `bytes 0-0/${file.size}`);
+		assert.is(res.data, file.data.slice(0, 1));
+	} finally {
+		server.close();
+	}
+});
+
 ranges('should throw `416` when range start cannot be met (overflow)', async () => {
 	let server = utils.http();
 
