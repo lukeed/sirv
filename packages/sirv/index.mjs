@@ -140,7 +140,7 @@ export default function (dir, opts={}) {
 
 	let ignores = [];
 	if (opts.ignores !== false) {
-		ignores.push(/[/]([A-Za-z\s\d~$._-]+\.\w+){1,}$/); // any extn
+		ignores.push(/\/[^/.][^/]*\.[A-Za-z0-9_-]*[A-Za-z][A-Za-z0-9_-]*$/); // any extn (must contain a letter, so `/v1.2.3` still falls back)
 		if (opts.dotfiles) ignores.push(/\/\.\w/);
 		else ignores.push(/\/\.well-known/);
 		[].concat(opts.ignores || []).forEach(x => {
