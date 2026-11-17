@@ -424,6 +424,25 @@ single('should NOT fallback to "index.html" for URLs with extension', async () =
 	}
 });
 
+single('should fallback to "index.html" for version-like dotted paths', async () => {
+	let server = utils.http({ single: true });
+
+	try {
+		// `/documents/1.8.3` is a route, not a file: its last segment
+		// only looks like an extension because it ends in `.3`
+		let res1 = await server.send('GET', '/documents/1.8.3');
+		await utils.matches(res1, 200, 'index.html', 'utf8');
+
+		let res2 = await server.send('GET', '/documents/document1/1.8.3/en');
+		await utils.matches(res2, 200, 'index.html', 'utf8');
+
+		let res3 = await server.send('GET', '/v1.2');
+		await utils.matches(res3, 200, 'index.html', 'utf8');
+	} finally {
+		server.close();
+	}
+});
+
 single.run();
 
 // ---
