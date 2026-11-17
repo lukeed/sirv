@@ -739,6 +739,25 @@ etag('should allow "If-None-Match" directive to function', async () => {
 	}
 });
 
+etag('should include ETag and Cache-Control in 304 responses', async () => {
+	let server = utils.http({ etag: true, maxAge: 60 });
+
+	try {
+		let res1 = await server.send('GET', '/bundle.67329.js');
+		assert.is(res1.statusCode, 200, 'normal request');
+
+		let headers = { 'If-None-Match': res1.headers['etag'] };
+		let res2 = await server.send('GET', '/bundle.67329.js', { headers });
+		assert.is(res2.statusCode, 304, 'send 304 for "no change" signal');
+		assert.is(res2.data, '', 'send empty response body');
+		assert.is(res2.headers['etag'], res1.headers['etag'], '304 carries ETag');
+		assert.is(res2.headers['cache-control'], 'public,max-age=60', '304 carries Cache-Control');
+		assert.is(res2.headers['last-modified'], res1.headers['last-modified'], '304 carries Last-Modified');
+	} finally {
+		server.close();
+	}
+});
+
 etag('should force `Cache-Control` header in `dev` mode', async () => {
 	let server = utils.http({ etag: true, dev: true });
 
@@ -1095,6 +1114,56 @@ ranges('should shrink range end if it cannot be met (overflow)', async () => {
 		let res = await server.send('GET', '/bundle.67329.js', { headers });
 		assert.is(res.headers['content-range'], `bytes 10-${file.size - 1}/${file.size}`);
 		assert.is(res.statusCode, 206);
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should ignore Range with an unknown unit', async () => {
+	let server = utils.http();
+
+	try {
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let headers = { Range: 'items=0-1' };
+		let res = await server.send('GET', '/bundle.67329.js', { headers });
+		assert.is(res.statusCode, 200, 'unknown range unit is ignored');
+		assert.is(res.data, file.data, 'send full file');
+		assert.not(res.headers['content-range']);
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should ignore Range when If-Range does not match', async () => {
+	let server = utils.http({ etag: true });
+
+	try {
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		for (let ifRange of ['Wed, 21 Oct 2015 07:28:00 GMT', '"no-such-etag"']) {
+			let headers = { Range: 'bytes=0-9', 'If-Range': ifRange };
+			let res = await server.send('GET', '/bundle.67329.js', { headers });
+			assert.is(res.statusCode, 200, `ignore Range for If-Range: ${ifRange}`);
+			assert.is(res.data, file.data, 'send full file');
+			assert.not(res.headers['content-range']);
+		}
+	} finally {
+		server.close();
+	}
+});
+
+ranges('should honor Range when If-Range matches', async () => {
+	let server = utils.http({ etag: true });
+
+	try {
+		let file = await utils.lookup('bundle.67329.js', 'utf8');
+		let res1 = await server.send('GET', '/bundle.67329.js');
+		for (let ifRange of [res1.headers['etag'], res1.headers['last-modified']]) {
+			let headers = { Range: 'bytes=0-9', 'If-Range': ifRange };
+			let res = await server.send('GET', '/bundle.67329.js', { headers });
+			assert.is(res.statusCode, 206, `honor Range for If-Range: ${ifRange}`);
+			assert.is(res.headers['content-range'], `bytes 0-9/${file.size}`);
+			assert.is(res.data, file.data.slice(0, 10));
+		}
 	} finally {
 		server.close();
 	}
