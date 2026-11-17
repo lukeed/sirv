@@ -70,9 +70,16 @@ function send(req, res, file, stats, headers) {
 		headers['Content-Type'] = tmp;
 	}
 
-	if (req.headers.range) {
+	// RFC 9110 §14.2: only the "bytes" unit is understood; any other unit
+	// must be ignored and the full representation sent instead.
+	// RFC 9110 §13.1.5: ignore the Range when If-Range does not match the
+	// validators sirv itself emits (ETag or Last-Modified).
+	let range = req.headers.range;
+	let ifRange = req.headers['if-range'];
+	let useRange = range && range.startsWith('bytes=') && (!ifRange || ifRange === headers['ETag'] || ifRange === headers['Last-Modified']);
+	if (useRange) {
 		code = 206;
-		let [x, y] = req.headers.range.replace('bytes=', '').split('-');
+		let [x, y] = range.substring(6).split('-');
 		let end = opts.end = parseInt(y, 10) || stats.size - 1;
 		let start = opts.start = parseInt(x, 10) || 0;
 
@@ -183,7 +190,14 @@ export default function (dir, opts={}) {
 		if (!data) return next ? next() : isNotFound(req, res);
 
 		if (isEtag && req.headers['if-none-match'] === data.headers['ETag']) {
-			res.writeHead(304);
+			// RFC 9110 §15.4.8: a 304 MUST carry the cache/validator
+			// headers a 200 to the same request would have carried.
+			let headers = {};
+			if (data.headers['ETag']) headers['ETag'] = data.headers['ETag'];
+			if (data.headers['Cache-Control']) headers['Cache-Control'] = data.headers['Cache-Control'];
+			if (data.headers['Last-Modified']) headers['Last-Modified'] = data.headers['Last-Modified'];
+			if (gzips || brots) headers['Vary'] = 'Accept-Encoding';
+			res.writeHead(304, headers);
 			return res.end();
 		}
 
