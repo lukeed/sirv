@@ -80,7 +80,7 @@ function send(req, res, file, stats, headers) {
 			end = stats.size - 1;
 		}
 
-		if (start >= stats.size) {
+		if (start >= stats.size || end < start) {
 			res.setHeader('Content-Range', `bytes */${stats.size}`);
 			res.statusCode = 416;
 			return res.end();
